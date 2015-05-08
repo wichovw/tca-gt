@@ -1,6 +1,6 @@
 import sys
 from socket import gethostbyname as get_host, gethostname as get_name
-from server.server import serve
+from server import serve
 
 def exit(msg=''):
     print("ERROR: " + msg)

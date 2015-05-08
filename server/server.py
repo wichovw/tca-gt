@@ -1,8 +1,8 @@
 import os
 import cherrypy
 import cherrypy_cors
-from server.map_parser import parse
-from server.tca.automatons import TCAAutomaton
+from map_parser import parse
+from tca.automatons import TCAAutomaton
 
 class TCAServer(object):
     exposed = True
