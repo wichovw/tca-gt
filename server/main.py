@@ -1,5 +1,6 @@
 import sys
 from socket import gethostbyname as get_host, gethostname as get_name
+from server.server import serve
 
 def exit(msg=''):
     print("ERROR: " + msg)
@@ -17,9 +18,6 @@ def exit(msg=''):
     """
     print(usg)
     sys.exit(2)
-    
-def YoLo( yaik ):
-  print ('waj')
 
 def main(argv):
     server_ip = 'localhost'
@@ -36,7 +34,7 @@ def main(argv):
             server_port = int(argv[1])
         except ValueError:
             exit("<server port> must be integer")
-    print('todo bien', server_ip, server_port)
+    serve(server_ip, server_port)
     
 if __name__ == '__main__':
     main(sys.argv[1:])

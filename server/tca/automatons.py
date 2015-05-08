@@ -1,0 +1,2 @@
+class TCAAutomaton:
+    pass
