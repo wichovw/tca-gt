@@ -15,6 +15,7 @@ class TCATopology(ca.Topology):
     border = None
     
     def __init__(self, map):
+        self.description = map
         self.streets = {}
         for street in map.streets:
             if street.id not in self.streets:
@@ -24,8 +25,9 @@ class TCATopology(ca.Topology):
                 raise ValueError("Duplicated street id: %s" % self.id)
     
     def normalize(self, address):
-        street_id, lane, cell = address
-        street = self.streets.get(street_id, None)
+        street, lane, cell = address
+        if type(street) != StreetTopology:
+            street = self.streets.get(street, None)
         if not street:
             raise IndexError
         addr = street.normalize((lane, cell))
@@ -51,3 +53,29 @@ class TCATopology(ca.Topology):
             street.set((lane, cell))
         else:
             raise IndexError
+            
+class TCANeighborhood(ca.ExtendedNeighborhood):
+    """The matrix of neighbors has the following distribution for max=3:
+    
+    (4, 2) (4, 1) (4, 0) (5, 0) (5, 1) (5, 2)           left lane
+    (3, 2) (3, 1) (3, 0)  CELL  (0, 0) (0, 1) (0, 2)    front
+    (2, 2) (2, 1) (2, 0) (1, 0) (1, 1) (1, 2)           right lane
+    """
+    
+    def neighbors(self, address, max=1):
+        x, y = address
+        return [[(x, y + i + 1) for i in range(max)],
+                [(x + 1, y + i) for i in range(max)],
+                [(x + 1, y - i - 1) for i in range(max)],
+                [(x, y - i - 1) for i in range(max)],
+                [(x + 1, y - i - 1) for i in range(max)],
+                [(x + 1, y + i) for i in range(max)]]
+                
+class TCAMap(TCATopology, TCANeighborhood):
+    
+    def __init__(self, map):
+        TCATopology.__init__(self, map)
+        TCANeighborhood.__init__(self)
+        
+    def clone(self):
+        return TCAMap(self.description)

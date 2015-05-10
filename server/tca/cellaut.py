@@ -14,7 +14,18 @@ class Topology:
         
     def normalize(self, address):
         raise NotImplementedError
-
+            
+class Neighborhood:
+    """Abstraction of the set of cells adjacent to any given cell"""
+    
+    def neighbors(self, address):
+        """Returns a list of addresses which are neighbors."""
+        raise NotImplementedError
+        
+    def states(self, address):
+        """Returns the list of cell values for all neighbors"""
+        return [self.get(x) for x in self.neighbors(address)]
+                  
 class GridTopology(Topology):
     """A two dimentional, bounded topology consisting of a rectangular grid
     of cells"""
@@ -49,3 +60,32 @@ class GridTopology(Topology):
             self.buffer[x][y] = state
         else:
             raise IndexError
+
+class ExtendedNeighborhood(Neighborhood):
+    """A neighborhood that retrieves a list of states on each direction"""
+    
+    def states(self, address, max=1):
+        return [[self.get(i) for i in j] for j in self.neighbors(address, max)]
+    
+class Automaton:
+    """Abstraction for the actions that can be made over the different cells
+    and states of a specified map"""
+    
+    def __init__(self, map):
+        self.map = map
+        self.generation = 0
+        
+    def update(self):
+        self.generation += 1
+        
+class Rule:
+    """Definition of rules to follow to change a cell value in an automaton"""
+    
+    def __init__(self, map, address):
+        self.populate(map, address)
+        
+    def populate(self, map, address):
+        raise NotImplementedError
+        
+    def apply(self):
+        raise NotImplementedError
