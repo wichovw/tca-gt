@@ -1,5 +1,5 @@
 import random
-import cellaut as ca
+import tca.cellaut as ca
 
 class TCARule(ca.Rule):
     
@@ -7,7 +7,7 @@ class TCARule(ca.Rule):
     random_slow_p = 0.3
     background = 0
 
-class StatesRule(ca.TCARule):
+class StatesRule(TCARule):
     """Rules for calculating new state of non-empty cells"""
     
     def populate(self, map, address):
@@ -38,7 +38,7 @@ class StatesRule(ca.TCARule):
             
         return (vel, size, wagon)
     
-class MovementRule(ca.TCARule):
+class MovementRule(TCARule):
     """Rules for 'moving the cars' to their new positions"""
     
     def populate(self, map, address):
@@ -54,13 +54,12 @@ class MovementRule(ca.TCARule):
 
     def apply(self):
         # if car is stopped on cell
-        if self.state != self.background and
-           self.state[0] == 0:
+        if self.state != self.background and self.state[0] == 0:
                 return self.state
         
         # if back car will land on cell
-        if self.back_car != self.background and
-           self.back_car[0] == self.back_gap + 1:
+        if self.back_car != self.background and self.back_car != None:
+            if self.back_car[0] == self.back_gap + 1:
                 return self.back_car
             
         # return background otherwise

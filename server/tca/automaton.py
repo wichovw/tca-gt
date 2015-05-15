@@ -1,31 +1,33 @@
-import cellaut as ca
+import copy
+import tca.cellaut as ca
 from tca.rules import StatesRule, MovementRule
 
 class TCAAutomaton(ca.Automaton):
     
-    speed_rule = ca.StatesRule
-    move_rule = ca.MovementRule
+    speed_rule = StatesRule
+    move_rule = MovementRule
     
     def __init__(self, map):
-        Automaton.__init__(self, map)
+        super().__init__(map)
         self.workmap = map.clone()
         
     def update(self):
-        self.update_step(speed_rule)
+        self.update_step(self.speed_rule)
         self.swap()
-        self.update_step(move_rule)
+        self.update_step(self.move_rule)
         self.swap()
-        Automaton.update(self)
+        ca.Automaton.update(self)
         
     def update_step(self, rule_class):
         for street_id in self.map.streets:
             street = self.map.streets[street_id]
             for lane in range(street.width):
-                for cell in range(street.length):
-                    address = street_id
+                for cell in range(street.height):
+                    address = (street_id, lane, cell)
                     rule = rule_class(self.map, address)
                     value = rule.apply()
                     self.workmap.set(address, value)
                     
     def swap(self):
-        self.map.buffer = self.workmap.buffer
+        for street in self.map.streets:
+            self.map.streets[street].buffer = copy.deepcopy(self.workmap.streets[street].buffer)

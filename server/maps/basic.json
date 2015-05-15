@@ -5,7 +5,7 @@
       "id": 0,
       "lanes": 2,
       "length": 20,
-      "front": [0, 0, 0], // (id, intesection_dist, lane_offset)
+      "front": [0, 0, 0],
       "right": null,
       "left": null
     }
