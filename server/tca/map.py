@@ -1,4 +1,4 @@
-import cellaut as ca
+import tca.cellaut as ca
 
 ca.GridTopology.background = 0
 ca.GridTopology.border = None
@@ -8,7 +8,7 @@ class StreetTopology(ca.GridTopology):
     def __init__(self, id, lanes, length, front):
         self.id = id
         self.front_id = front[0]
-        super().__init__(lanes, length)
+        super().__init__((lanes, length))
         
 class TCATopology(ca.Topology):
     
@@ -17,12 +17,24 @@ class TCATopology(ca.Topology):
     def __init__(self, map):
         self.description = map
         self.streets = {}
-        for street in map.streets:
-            if street.id not in self.streets:
-                top = StreetTopology(street.id, street.lanes, street.length, street.front)
-                self.streets[self.id] = top
+        for street in map['streets']:
+            if street['id'] not in self.streets:
+                top = StreetTopology(street['id'], street['lanes'], street['length'], street['front'])
+                self.streets[street['id']] = top
             else:
                 raise ValueError("Duplicated street id: %s" % self.id)
+        # look for streets on the back
+        for street_id, street in self.streets.items():
+            back_street = None
+            for sid, strt in self.streets.items():
+                if strt.front_id == street_id:
+                    street.back_id = sid
+                    break
+            
+        for car in map['cars']:
+            address = (car['streetId'], car['lane'], car['cell'])
+            state = (car['speed'], 0, 0)
+            self.set(address, state)
     
     def normalize(self, address):
         street, lane, cell = address
@@ -32,10 +44,15 @@ class TCATopology(ca.Topology):
             raise IndexError
         addr = street.normalize((lane, cell))
         if not addr:
-            if lane < 0 or lane >= street.width or cell < 0:
+            if lane < 0 or lane >= street.width:
                 return None
+            elif cell < 0:
+                back = self.streets.get(street.back_id, None)
+                if not back:
+                    return None
+                return self.normalize((street.back_id, lane, cell + back.height))
             else:
-                return self.normalize((street.front_id, lane, cell - street.length))
+                return self.normalize((street.front_id, lane, cell - street.height))
         return (street, addr[0], addr[1])
     
     def get(self, address):
@@ -44,13 +61,13 @@ class TCATopology(ca.Topology):
             street, lane, cell = addr
             return street.get((lane, cell))
         else:
-            return border
+            return self.border
         
     def set(self, address, state):
         addr = self.normalize(address)
         if addr:
             street, lane, cell = addr
-            street.set((lane, cell))
+            street.set((lane, cell), state)
         else:
             raise IndexError
             
@@ -63,13 +80,13 @@ class TCANeighborhood(ca.ExtendedNeighborhood):
     """
     
     def neighbors(self, address, max=1):
-        x, y = address
-        return [[(x, y + i + 1) for i in range(max)],
-                [(x + 1, y + i) for i in range(max)],
-                [(x + 1, y - i - 1) for i in range(max)],
-                [(x, y - i - 1) for i in range(max)],
-                [(x + 1, y - i - 1) for i in range(max)],
-                [(x + 1, y + i) for i in range(max)]]
+        s, x, y = address
+        return [[(s, x, y + i + 1) for i in range(max)],
+                [(s, x + 1, y + i) for i in range(max)],
+                [(s, x + 1, y - i - 1) for i in range(max)],
+                [(s, x, y - i - 1) for i in range(max)],
+                [(s, x - 1, y - i - 1) for i in range(max)],
+                [(s, x - 1, y + i) for i in range(max)]]
                 
 class TCAMap(TCATopology, TCANeighborhood):
     

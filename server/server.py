@@ -1,16 +1,25 @@
 import os
-import cherrypy
-import cherrypy_cors
-from map_parser import parse
-from tca.automatons import TCAAutomaton
+import cherrypy, cherrypy_cors
+from tca_parser import parse
+from tca_renderer import renderStreet
+from tca.map import TCAMap
+from tca.automaton import TCAAutomaton
 
 class TCAServer(object):
-    exposed = True
     
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
     def start(self, map='basic'):
         matrix = parse(map)
-        self.automaton = TCAAutomaton(matrix)
-        
+        map = TCAMap(matrix)
+        self.automaton = TCAAutomaton(map)
+        return renderStreet(self.automaton.map, street_id=0)
+    
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def update(self, map='basic'):
+        self.automaton.update()
+        return renderStreet(self.automaton.map, street_id=0)
 
 PATH = os.path.abspath(os.path.dirname(__file__))
 
