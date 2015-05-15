@@ -23,6 +23,14 @@ class TCATopology(ca.Topology):
                 self.streets[street['id']] = top
             else:
                 raise ValueError("Duplicated street id: %s" % self.id)
+        # look for streets on the back
+        for street_id, street in self.streets.items():
+            back_street = None
+            for sid, strt in self.streets.items():
+                if strt.front_id == street_id:
+                    street.back_id = sid
+                    break
+            
         for car in map['cars']:
             address = (car['streetId'], car['lane'], car['cell'])
             state = (car['speed'], 0, 0)
@@ -36,8 +44,13 @@ class TCATopology(ca.Topology):
             raise IndexError
         addr = street.normalize((lane, cell))
         if not addr:
-            if lane < 0 or lane >= street.width or cell < 0:
+            if lane < 0 or lane >= street.width:
                 return None
+            elif cell < 0:
+                back = self.streets.get(street.back_id, None)
+                if not back:
+                    return None
+                return self.normalize((street.back_id, lane, cell + back.height))
             else:
                 return self.normalize((street.front_id, lane, cell - street.height))
         return (street, addr[0], addr[1])
