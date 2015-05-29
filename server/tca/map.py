@@ -5,11 +5,67 @@ ca.GridTopology.background = 0
 ca.GridTopology.border = None
 
 class StreetTopology(ca.GridTopology):
+    intersection = None
+    orientation = 0
+    front = {
+        "right": None,
+        "left": None,
+    }
+    back = {
+        "right": None,
+        "left": None,
+    }
     
     def __init__(self, id, lanes, length, front):
         self.id = id
-        self.front_id = front[0]
+        self.front_id = front.get('straight', None)
+        self.front_offset = front.get('offset', 0)
+        self.front['right'] = front.get('right', None)
+        self.front['left'] = front.get('left', None)
+        self.back_id = None
         super().__init__((lanes, length))
+        
+    def normalize(self, address):
+        addr = super().normalize(address)
+        if not addr:
+            lane, cell = address
+            if lane in range(self.width) and cell - self.height in range(self.front_offset):
+                return address
+        return addr
+    
+    def normalize_intersection(self, address):
+        x, y = address
+        y -= self.height
+        if x in range(self.width) and y in range(self.front_offset):
+            if self.orientation == 0:
+                return (x, y)
+            elif self.orientation == 1:
+                return (self.front_offset - y - 1, x)
+            elif self.orientation == 3:
+                return (y, self.width - x - 1)
+    
+    def get(self, address):
+        addr = self.normalize(address)
+        if addr:
+            x, y = addr
+            if y < self.height:
+                return self.buffer[x][y]
+            else:
+                return self.intersection.get(self.normalize_intersection(addr))
+        else:
+            return self.border
+        
+    def set(self, address, value):
+        addr = self.normalize(address)
+        if addr:
+            x, y = addr
+            if y < self.height:
+                self.buffer[x][y] = value
+            else:
+                self.intersection.set(self.normalize_intersection(addr), value)
+        else:
+            raise IndexError
+        
         
 class TCATopology(ca.Topology):
     
@@ -24,14 +80,28 @@ class TCATopology(ca.Topology):
                 self.streets[street['id']] = top
             else:
                 raise ValueError("Duplicated street id: %s" % self.id)
+                
         # look for streets on the back
         for street_id, street in self.streets.items():
-            back_street = None
-            for sid, strt in self.streets.items():
-                if strt.front_id == street_id:
-                    street.back_id = sid
-                    break
+            front = self.streets.get(street.front_id, None)
+            if front:
+                front.back_id = street_id
+                
+        # create intersections
+        for street_id, street in self.streets.items():
+            for direction in ['right', 'left']:
+                turn = self.streets.get(street.front[direction], None)
+                if turn:
+                    back = self.streets.get(turn.back_id, None)
+                    if back and back.intersection:
+                        street.intersection = back.intersection
+                        street.orientation = 3 if direction == 'right' else 1
+                        street.front_offset = back.width
+                        break
+            if not street.intersection:
+                street.intersection = ca.GridTopology((street.width, street.front_offset))
             
+        # populate cars
         for car in map['cars']:
             address = (car['streetId'], car['lane'], car['cell'])
             state = Car(speed=car['speed'])
@@ -51,9 +121,9 @@ class TCATopology(ca.Topology):
                 back = self.streets.get(street.back_id, None)
                 if not back:
                     return None
-                return self.normalize((street.back_id, lane, cell + back.height))
+                return self.normalize((street.back_id, lane, cell + back.height + back.front_offset))
             else:
-                return self.normalize((street.front_id, lane, cell - street.height))
+                return self.normalize((street.front_id, lane, cell - street.height - street.front_offset))
         return (street, addr[0], addr[1])
     
     def get(self, address):

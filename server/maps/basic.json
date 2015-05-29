@@ -5,7 +5,10 @@
       "id": 0,
       "lanes": 2,
       "length": 60,
-      "front": [0, 0, 0]
+      "front": {
+        "straight": 0,
+        "offset": 0
+      }
     }
   ],
   "cars": [

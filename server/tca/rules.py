@@ -3,7 +3,7 @@ import tca.cellaut as ca
 
 class TCARule(ca.Rule):
     
-    vmax = 2
+    vmax = 1
     random_slow_p = 0.3
     background = 0
 
