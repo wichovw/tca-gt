@@ -6,6 +6,7 @@ class TCARule(ca.Rule):
     vmax = 2
     random_slow_p = 0.3
     background = 0
+    change_lane_p = 0.5
 
 class StatesRule(TCARule):
     """Rules for calculating new state of non-empty cells"""
@@ -18,7 +19,17 @@ class StatesRule(TCARule):
                 self.front_gap += 1
             else:
                 break
-        
+
+        self.left_gap = 0
+        self.right_gap = 0
+        neighbors = map.neighbors(address)
+
+        if neighbors[0] == self.background:
+            self.left_gap += 1
+
+        if neighbors[4] == self.background:
+            self.right_gap += 1
+
     def apply(self):
         # if background, no calculations needed
         if self.state == self.background:
@@ -35,6 +46,15 @@ class StatesRule(TCARule):
         # Nasch randomly slowing of vehicle
         if random.random() < self.random_slow_p:
             car.speed = max(car.speed - 1, 0)
+
+        # TCA_GT changing lane intention
+        if random.random() < self.change_lane_p:
+            if self.left_gap == 0 and self.right_gap == 0:
+                car.change_lane_intention = 0
+            elif self.left_gap > 0:
+                car.change_lane_intention = -1
+            elif self.right_gap > 0:
+                car.change_lane_intention = 1
             
         return car
     
