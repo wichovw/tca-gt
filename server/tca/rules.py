@@ -3,7 +3,7 @@ import tca.cellaut as ca
 
 class TCARule(ca.Rule):
     
-    vmax = 5
+    vmax = 2
     random_slow_p = 0.3
     background = 0
 
@@ -24,19 +24,19 @@ class StatesRule(TCARule):
         if self.state == self.background:
             return self.background
         
-        vel, size, wagon = self.state
+        car = self.state.clone()
         
         # Nasch acceleration rule
-        vel = min(vel + 1, self.vmax)
+        car.speed = min(car.speed + 1, self.vmax)
         
         # Nasch gap consideration rule
-        vel = min(vel, self.front_gap)
+        car.speed = min(car.speed, self.front_gap)
         
         # Nasch randomly slowing of vehicle
         if random.random() < self.random_slow_p:
-            vel = max(vel - 1, 0)
+            car.speed = max(car.speed - 1, 0)
             
-        return (vel, size, wagon)
+        return car
     
 class MovementRule(TCARule):
     """Rules for 'moving the cars' to their new positions"""
@@ -54,12 +54,12 @@ class MovementRule(TCARule):
 
     def apply(self):
         # if car is stopped on cell
-        if self.state != self.background and self.state[0] == 0:
+        if self.state != self.background and self.state.speed == 0:
                 return self.state
         
         # if back car will land on cell
         if self.back_car != self.background and self.back_car != None:
-            if self.back_car[0] == self.back_gap + 1:
+            if self.back_car.speed == self.back_gap + 1:
                 return self.back_car
             
         # return background otherwise

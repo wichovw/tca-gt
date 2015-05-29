@@ -1,4 +1,5 @@
 import tca.cellaut as ca
+from tca.cars import Car
 
 ca.GridTopology.background = 0
 ca.GridTopology.border = None
@@ -33,7 +34,7 @@ class TCATopology(ca.Topology):
             
         for car in map['cars']:
             address = (car['streetId'], car['lane'], car['cell'])
-            state = (car['speed'], 0, 0)
+            state = Car(speed=car['speed'])
             self.set(address, state)
     
     def normalize(self, address):
