@@ -2,7 +2,7 @@ import uuid
 
 class Car:
     speed = 0
-    change_lane_intention = False
+    change_lane_intention = 0
     
     def __init__(self, **kwargs):
         if 'id' in kwargs:
