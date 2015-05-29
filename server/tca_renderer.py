@@ -8,7 +8,7 @@ def renderStreet(map, street_id=0):
         row = []
         for cell in range(street.height):
             val = street.get((lane, cell))
-            row.append(-1 if val == 0 else val[0])
+            row.append(-1 if val == 0 else val.speed)
         graph.append(row)
 #    graph.append([-2 for _ in range(street.height)])
     
