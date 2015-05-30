@@ -6,7 +6,7 @@ class TCARule(ca.Rule):
     vmax = 1
     random_slow_p = 0.3
     background = 0
-    change_lane_p = 0.5
+    change_lane_p = 0.2
 
 class StatesRule(TCARule):
     """Rules for calculating new state of non-empty cells"""
@@ -14,6 +14,8 @@ class StatesRule(TCARule):
     def populate(self, map, address):
         self.state = map.get(address)
         self.front_gap = 0
+
+
         for cell in map.states(address, self.vmax)[0]:
             if cell == self.background:
                 self.front_gap += 1
@@ -69,6 +71,8 @@ class StatesRule(TCARule):
             return self.background
         
         car = self.state.clone()
+
+        car.change_lane_intention = 0
         
         # Nasch acceleration rule
         car.speed = min(car.speed + 1, self.vmax)
@@ -107,6 +111,7 @@ class MovementRule(TCARule):
         self.state = map.get(address)
         self.back_gap = 0
         self.back_car = self.background
+
         for cell in map.states(address, self.vmax)[3]:
             if cell == self.background:
                 self.back_gap += 1
@@ -114,14 +119,34 @@ class MovementRule(TCARule):
                 self.back_car = cell
                 break
 
+        self.left_car = self.background
+        self.right_car = self.background
+        # verify right lane
+        if map.states(address, 1)[1][0] != self.background and map.states(address, 1)[1][0] is not None:
+            if map.states(address, 1)[1][0].change_lane_intention == -1:
+                self.right_car = map.states(address, 1)[1][0]
+
+        # verify left lane
+        if map.states(address, 1)[5][0] != self.background and map.states(address, 1)[5][0] is not None:
+            if map.states(address, 1)[5][0].change_lane_intention == 1:
+                self.left_car = map.states(address, 1)[5][0]
+
+
     def apply(self):
         # if car is stopped on cell
         if self.state != self.background and self.state.speed == 0:
-                return self.state
+            return self.state
+
+         # if lane change allowed
+        if self.left_car != self.background and self.left_car is not None:
+            return self.left_car
+
+        if self.right_car != self.background and self.right_car is not None:
+            return self.right_car
         
         # if back car will land on cell
-        if self.back_car != self.background and self.back_car != None:
-            if self.back_car.speed == self.back_gap + 1:
+        if self.back_car != self.background and self.back_car is not None:
+            if self.back_car.speed == self.back_gap + 1 and self.back_car.change_lane_intention == 0:
                 return self.back_car
             
         # return background otherwise
