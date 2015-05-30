@@ -20,15 +20,48 @@ class StatesRule(TCARule):
             else:
                 break
 
-        self.left_gap = 0
-        self.right_gap = 0
-        neighbors = map.neighbors(address)
+        self.right_change_allowed = False
+        self.left_change_allowed = False
 
-        if neighbors[0] == self.background:
-            self.left_gap += 1
+        # verify if right cell is empty
+        if map.states(address, 1)[1][0] == self.background:
+            self.right_back_gap = 0
+            self.right_car_speed = 0
 
-        if neighbors[4] == self.background:
-            self.right_gap += 1
+            # verify if car speed < gap
+            for cell in map.states(address, self.vmax)[2]:
+                if cell == self.background:
+                    self.right_back_gap += 1
+                elif cell is None:
+                    break
+                else:
+                    self.right_car_speed = cell.speed
+                    break
+
+            # Verify if car is allowed change
+            if self.right_car_speed < self.right_back_gap:
+                self.right_change_allowed = True
+
+
+        # verify if left cell is empty
+        if map.states(address, 1)[5][0] == self.background:
+            self.left_back_gap = 0
+            self.left_car_speed = 0
+
+            # verify if car speed < gap
+            for cell in map.states(address, self.vmax)[4]:
+                if cell == self.background:
+                    self.left_back_gap += 1
+                elif cell is None:
+                    break
+                else:
+                    self.left_car_speed = cell.speed
+                    break
+
+            # Verify if car is allowed change
+            if self.left_car_speed < self.left_back_gap:
+                self.left_change_allowed = True
+
 
     def apply(self):
         # if background, no calculations needed
@@ -49,12 +82,21 @@ class StatesRule(TCARule):
 
         # TCA_GT changing lane intention
         if random.random() < self.change_lane_p:
-            if self.left_gap == 0 and self.right_gap == 0:
-                car.change_lane_intention = 0
-            elif self.left_gap > 0:
-                car.change_lane_intention = -1
-            elif self.right_gap > 0:
+            # Right allowed
+            if self.right_change_allowed and not self.left_change_allowed:
                 car.change_lane_intention = 1
+            # Left allowed
+            elif self.left_change_allowed and not self.right_change_allowed:
+                car.change_lane_intention = -1
+            # Both allowed
+            elif self.right_change_allowed and self.left_change_allowed:
+                if random.random() < 0.5:
+                    car.change_lane_intention = 1
+                else:
+                    car.change_lane_intention = -1
+            else:
+                car.change_lane_intention = 0
+
             
         return car
     
