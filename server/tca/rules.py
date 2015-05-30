@@ -65,6 +65,7 @@ class MovementRule(TCARule):
         self.state = map.get(address)
         self.back_gap = 0
         self.back_car = self.background
+        print(address, map.states(address, self.vmax))
         for cell in map.states(address, self.vmax)[3]:
             if cell == self.background:
                 self.back_gap += 1

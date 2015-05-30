@@ -22,7 +22,7 @@ class TCAAutomaton(ca.Automaton):
         for street_id in self.map.streets:
             street = self.map.streets[street_id]
             for lane in range(street.width):
-                for cell in range(street.height):
+                for cell in range(street.height + street.front_offset):
                     address = (street_id, lane, cell)
                     rule = rule_class(self.map, address)
                     value = rule.apply()
