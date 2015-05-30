@@ -69,9 +69,10 @@ class StatesRule(TCARule):
         # if background, no calculations needed
         if self.state == self.background:
             return self.background
-        
-        car = self.state.clone()
 
+        self.state.change_lane_intention = 0
+
+        car = self.state.clone()
         car.change_lane_intention = 0
         
         # Nasch acceleration rule
@@ -134,7 +135,7 @@ class MovementRule(TCARule):
 
     def apply(self):
         # if car is stopped on cell
-        if self.state != self.background and self.state.speed == 0:
+        if self.state != self.background and self.state.speed == 0 and self.state.change_lane_intention == 0:
             return self.state
 
          # if lane change allowed
