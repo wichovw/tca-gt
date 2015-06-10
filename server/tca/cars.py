@@ -15,7 +15,7 @@ class Car:
         if 'change_lane_intention' in kwargs:
             self.change_lane_intention = kwargs['change_lane_intention']
         if 'street' in kwargs:
-            street = kwargs['street']
+            self.street = kwargs['street']
             
     def clone(self):
         return Car(id=self.id,

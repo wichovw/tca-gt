@@ -19,6 +19,7 @@ class TCAAutomaton(ca.Automaton):
     def update(self):
         self.update_step(self.speed_rule)
         self.swap()
+        print(self.map.__str__(True))
         self.update_step(self.move_rule)
         self.swap()
         ca.Automaton.update(self)

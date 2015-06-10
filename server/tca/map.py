@@ -142,8 +142,9 @@ class TCATopology(ca.Topology):
         else:
             raise IndexError
             
-    def __str__(self):
+    def __str__(self, cars_only=False):
         val = ""
+        cars = []
         for street_id, street in self.streets.items():
             val += '\nStreet %s' % street_id
             for lane in range(street.width):
@@ -152,8 +153,18 @@ class TCATopology(ca.Topology):
                     state = self.get((street_id, lane, cell))
                     if state:
                         val += state.id[0]
+                        cars.append(((street_id, lane, cell), state))
                     else:
                         val += '_'
+        if cars_only:
+            val = ""
+        for address, car in cars:
+            val += "\n%10s, [%s] speed:%s, cli:%s, strt:%s" % (address,
+                                                             car.id[0],
+                                                             car.speed,
+                                                             car.change_lane_intention,
+                                                             car.street
+                                                            )
         return val
             
 class TCANeighborhood(ca.ExtendedNeighborhood):
