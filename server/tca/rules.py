@@ -3,7 +3,7 @@ import tca.cellaut as ca
 
 class TCARule(ca.Rule):
     
-    vmax = 1
+    vmax = 3
     random_slow_p = 0.3
     background = 0
     change_lane_p = 0.5
@@ -65,7 +65,8 @@ class MovementRule(TCARule):
         self.state = map.get(address)
         self.back_gap = 0
         self.back_car = self.background
-        print(address, map.states(address, self.vmax))
+#        print("%12s"%str(address), map.states(address, self.vmax))
+        self.address = address
         for cell in map.states(address, self.vmax)[3]:
             if cell == self.background:
                 self.back_gap += 1
@@ -78,6 +79,7 @@ class MovementRule(TCARule):
         if self.state != self.background and self.state.speed == 0:
                 return self.state
         
+#        print("%12s"%str(self.address), self.back_car)
         # if back car will land on cell
         if self.back_car != self.background and self.back_car != None:
             if self.back_car.speed == self.back_gap + 1:

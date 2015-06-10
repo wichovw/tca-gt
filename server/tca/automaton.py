@@ -31,3 +31,4 @@ class TCAAutomaton(ca.Automaton):
     def swap(self):
         for street in self.map.streets:
             self.map.streets[street].buffer = copy.deepcopy(self.workmap.streets[street].buffer)
+            self.map.streets[street].intersection.buffer = copy.deepcopy(self.workmap.streets[street].intersection.buffer)

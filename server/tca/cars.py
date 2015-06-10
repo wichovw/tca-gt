@@ -19,3 +19,6 @@ class Car:
                    speed=self.speed,
                    change_lane_intention=self.change_lane_intention
                   )
+    
+    def __repr__(self):
+        return "<Car [%s] s:%d>" % (self.id[:4], self.speed)
