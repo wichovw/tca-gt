@@ -10,6 +10,11 @@ class TCAAutomaton(ca.Automaton):
     def __init__(self, map):
         super().__init__(map)
         self.workmap = map.clone()
+        self.visited_map = map.clone()
+        for street_id, street in self.visited_map.streets.items():
+            for lane in range(street.width):
+                for cell in range(street.height + street.front_offset):
+                    self.visited_map.set((street_id, lane, cell), False)
         
     def update(self):
         self.update_step(self.speed_rule)
@@ -27,9 +32,17 @@ class TCAAutomaton(ca.Automaton):
                     address = (street_id, lane, cell)
                     rule = rule_class(self.map, address)
                     value = rule.apply()
+                    if self.visited_map.get(address) and not value:
+                        continue
                     self.workmap.set(address, value)
+                    self.visited_map.set(address, True)
                     
     def swap(self):
         for street in self.map.streets:
             self.map.streets[street].buffer = copy.deepcopy(self.workmap.streets[street].buffer)
             self.map.streets[street].intersection.buffer = copy.deepcopy(self.workmap.streets[street].intersection.buffer)
+            
+        for street_id, street in self.visited_map.streets.items():
+            for lane in range(street.width):
+                for cell in range(street.height + street.front_offset):
+                    self.visited_map.set((street_id, lane, cell), False)

@@ -112,6 +112,8 @@ class MovementRule(TCARule):
         self.state = map.get(address)
         self.back_gap = 0
         self.back_car = self.background
+        
+        self.street_id = address[0]
 
         self.address = address
         for cell in map.states(address, self.vmax)[3]:
