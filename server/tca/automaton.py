@@ -17,6 +17,7 @@ class TCAAutomaton(ca.Automaton):
         self.update_step(self.move_rule)
         self.swap()
         ca.Automaton.update(self)
+        print(str(self.map))
         
     def update_step(self, rule_class):
         for street_id in self.map.streets:

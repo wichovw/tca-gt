@@ -3,7 +3,7 @@ import tca.cellaut as ca
 
 class TCARule(ca.Rule):
     
-    vmax = 3
+    vmax = 1
     random_slow_p = 0.3
     background = 0
     change_lane_p = 0.2
@@ -82,25 +82,25 @@ class StatesRule(TCARule):
         car.speed = min(car.speed, self.front_gap)
         
         # Nasch randomly slowing of vehicle
-        if random.random() < self.random_slow_p:
-            car.speed = max(car.speed - 1, 0)
+#        if random.random() < self.random_slow_p:
+#            car.speed = max(car.speed - 1, 0)
 
         # TCA_GT changing lane intention
-        if random.random() < self.change_lane_p:
-            # Right allowed
-            if self.right_change_allowed and not self.left_change_allowed:
-                car.change_lane_intention = 1
-            # Left allowed
-            elif self.left_change_allowed and not self.right_change_allowed:
-                car.change_lane_intention = -1
-            # Both allowed
-            elif self.right_change_allowed and self.left_change_allowed:
-                if random.random() < 0.5:
-                    car.change_lane_intention = 1
-                else:
-                    car.change_lane_intention = -1
-            else:
-                car.change_lane_intention = 0
+#        if random.random() < self.change_lane_p:
+#            # Right allowed
+#            if self.right_change_allowed and not self.left_change_allowed:
+#                car.change_lane_intention = 1
+#            # Left allowed
+#            elif self.left_change_allowed and not self.right_change_allowed:
+#                car.change_lane_intention = -1
+#            # Both allowed
+#            elif self.right_change_allowed and self.left_change_allowed:
+#                if random.random() < 0.5:
+#                    car.change_lane_intention = 1
+#                else:
+#                    car.change_lane_intention = -1
+#            else:
+#                car.change_lane_intention = 0
 
             
         return car

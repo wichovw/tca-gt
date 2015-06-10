@@ -40,9 +40,9 @@ class StreetTopology(ca.GridTopology):
             if self.orientation == 0:
                 return (x, y)
             elif self.orientation == 1:
-                return (self.front_offset - y - 1, x)
+                return (self.width - y - 1, x)
             elif self.orientation == 3:
-                return (y, self.width - x - 1)
+                return (y, self.front_offset - x - 1)
     
     def get(self, address):
         addr = self.normalize(address)
@@ -95,7 +95,7 @@ class TCATopology(ca.Topology):
                     back = self.streets.get(turn.back_id, None)
                     if back and back.intersection:
                         street.intersection = back.intersection
-                        street.orientation = 3 if direction == 'right' else 1
+                        street.orientation = 3 if direction == 'left' else 1
                         street.front_offset = back.width
                         break
             if not street.intersection:
@@ -104,7 +104,7 @@ class TCATopology(ca.Topology):
         # populate cars
         for car in map['cars']:
             address = (car['streetId'], car['lane'], car['cell'])
-            state = Car(speed=car['speed'])
+            state = Car(speed=car['speed'], street=car['streetId'])
             self.set(address, state)
     
     def normalize(self, address):
@@ -141,6 +141,20 @@ class TCATopology(ca.Topology):
             street.set((lane, cell), state)
         else:
             raise IndexError
+            
+    def __str__(self):
+        val = ""
+        for street_id, street in self.streets.items():
+            val += '\nStreet %s' % street_id
+            for lane in range(street.width):
+                val += '\n'
+                for cell in range(street.height + street.front_offset):
+                    state = self.get((street_id, lane, cell))
+                    if state:
+                        val += state.id[0]
+                    else:
+                        val += '_'
+        return val
             
 class TCANeighborhood(ca.ExtendedNeighborhood):
     """The matrix of neighbors has the following distribution for max=3:
