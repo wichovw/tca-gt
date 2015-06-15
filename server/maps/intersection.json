@@ -22,18 +22,5 @@
       }
     }
   ],
-  "cars": [
-    {
-      "streetId": 0,
-      "lane": 0,
-      "cell": 5,
-      "speed": 0
-    },
-    {
-      "streetId": 1,
-      "lane": 0,
-      "cell": 15,
-      "speed": 0
-    }
-  ]
+  "cars": 5
 }

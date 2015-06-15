@@ -1,5 +1,6 @@
 import tca.cellaut as ca
 from tca.cars import Car
+from random import randint
 
 ca.GridTopology.background = 0
 ca.GridTopology.border = None
@@ -102,10 +103,18 @@ class TCATopology(ca.Topology):
                 street.intersection = ca.GridTopology((street.width, street.front_offset))
             
         # populate cars
-        for car in map['cars']:
-            address = (car['streetId'], car['lane'], car['cell'])
-            state = Car(speed=car['speed'], street=car['streetId'])
+        for car in range(map['cars']):
+            street_id = randint(0, len(self.streets) - 1)
+            street = self.streets[street_id]
+            lane = randint(0, street.width - 1)
+            cell = randint(0, street.height - 1)
+            address = (street_id, lane, cell)
+            state = Car(street=street_id)
             self.set(address, state)
+#        for car in map['cars']:
+#            address = (car['streetId'], car['lane'], car['cell'])
+#            state = Car(speed=car['speed'], street=car['streetId'])
+#            self.set(address, state)
     
     def normalize(self, address):
         street, lane, cell = address

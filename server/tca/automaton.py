@@ -1,6 +1,7 @@
 import copy
 import tca.cellaut as ca
 from tca.rules import StatesRule, MovementRule
+from logger import logger
 
 class TCAAutomaton(ca.Automaton):
     
@@ -16,12 +17,33 @@ class TCAAutomaton(ca.Automaton):
                 for cell in range(street.height + street.front_offset):
                     self.visited_map.set((street_id, lane, cell), False)
         
+    def log(self, phase):
+        i = 0
+        for street_id, street in self.map.streets.items():
+            for lane in range(street.width):
+                for cell in range(street.height + street.front_offset):
+                    car = self.map.get((street_id, lane, cell))
+                    if car:
+                        logger.debug('%5d %5s(%3d) [%s] %10s s:%s, cli:%2s' %
+                                     (self.generation,
+                                      phase,
+                                      i,
+                                      car.id[:4],
+                                      (street_id, lane, cell),
+                                      car.speed,
+                                      car.change_lane_intention))
+                        i += 1
+                                      
+                        
+        
     def update(self):
         self.update_step(self.speed_rule)
         self.swap()
-        print(self.map.__str__(True))
+#        print(self.map.__str__(True))
+        self.log('SPEED')
         self.update_step(self.move_rule)
         self.swap()
+        self.log('MOVE')
         ca.Automaton.update(self)
         print(str(self.map))
         

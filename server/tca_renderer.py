@@ -19,36 +19,48 @@ def renderIntersection(map, hstreet_id=0, vstreet_id=1):
     graph = []
     horizontal = map.streets[hstreet_id]
     vertical = map.streets[vstreet_id]
+    hfront = map.streets[horizontal.front_id]
+    vfront = map.streets[vertical.front_id]
     
-    width = horizontal.height + horizontal.front_offset
-    height = vertical.height + vertical.front_offset
-    
-    fill = (int((width - vertical.width) / 2),
-            int((height - horizontal.width) / 2))
+    width = horizontal.height + horizontal.front_offset + hfront.height
+    height = vertical.height + vertical.front_offset + vfront.height
     
     graph = [[-2] * width for _ in range(height)]
     
     for lane in range(horizontal.width):
-        for cell in range(width):
+        for cell in range(horizontal.height + horizontal.front_offset):
             val = horizontal.get((lane, cell))
-            y = lane + fill[1]
-            x = (cell + fill[0] + vertical.width) % height
+            y = lane + vertical.height
+            x = cell
+            graph[x][y] = -1 if val == 0 else val.speed
+            
+    for lane in range(hfront.width):
+        for cell in range(hfront.height):
+            val = hfront.get((lane, cell))
+            y = lane + vertical.height
+            x = cell + horizontal.height + horizontal.front_offset
             graph[x][y] = -1 if val == 0 else val.speed
             
     for lane in range(vertical.width):
-        for cell in range(height):
+        for cell in range(vertical.height):
             val = vertical.get((lane, cell))
-            x = lane + fill[0]
-            y = (cell + fill[1] + horizontal.width) % width
+            x = lane + horizontal.height
+            y = cell
             if vertical.orientation == 3:
                 x = width - x - 1
+            if vertical.orientation == 1:
+                y = height - y - 1
             graph[x][y] = -1 if val == 0 else val.speed
             
-#    graph2 = []
-#    for y in range(len(graph[0])):
-#        r = []
-#        for x in range(len(graph)):
-#            r.append(graph[x][y])
-#        graph2.append(r)
+    for lane in range(vertical.width):
+        for cell in range(vfront.height):
+            val = vfront.get((lane, cell))
+            x = lane + horizontal.height
+            y = cell + vertical.height + vertical.front_offset
+            if vertical.orientation == 3:
+                x = width - x - 1
+            if vertical.orientation == 1:
+                y = height - y - 1
+            graph[x][y] = -1 if val == 0 else val.speed
     
     return graph

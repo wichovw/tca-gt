@@ -19,7 +19,7 @@ define(['jquery', './data'], function ($, data) {
     .then(function(response){
       data.set('matrix', response);
     }, function(fail){
-      alert('Connection fail');
+//      alert('Connection fail');
       console.log(fail);
       //Stop updating
       clearInterval();
