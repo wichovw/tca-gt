@@ -18,6 +18,8 @@ class Car:
             self.change_lane_intention = kwargs['change_lane_intention']
         if 'street' in kwargs:
             self.street = kwargs['street']
+        if 'probability' in kwargs:
+            self.probability = kwargs['probability']
 
         # probability
         self.probability['random_slow_p'] = random.random()
@@ -29,8 +31,8 @@ class Car:
         return Car(id=self.id,
                    speed=self.speed,
                    change_lane_intention=self.change_lane_intention,
-                   street=self.street
-                  )
+                   street=self.street,
+                   probability=self.probability)
 
     def get_personality_color(self):
         """
