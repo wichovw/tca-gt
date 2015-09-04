@@ -16,6 +16,8 @@ class TCAAutomaton(ca.Automaton):
             for lane in range(street.width):
                 for cell in range(street.height + street.front_offset):
                     self.visited_map.set((street_id, lane, cell), False)
+        for s in self.map.semaphores:
+            s.start()
         
     def log(self, phase):
         i = 0
@@ -37,6 +39,8 @@ class TCAAutomaton(ca.Automaton):
                         
         
     def update(self):
+        for s in self.map.semaphores:
+            s.update()
         self.update_step(self.speed_rule)
         self.swap()
 #        print(self.map.__str__(True))
@@ -45,7 +49,7 @@ class TCAAutomaton(ca.Automaton):
         self.swap()
         self.log('MOVE')
         ca.Automaton.update(self)
-        print(str(self.map))
+#        print(str(self.map))
         
     def update_step(self, rule_class):
         for street_id in self.map.streets:

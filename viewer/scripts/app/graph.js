@@ -12,7 +12,10 @@ define(['pixi', './data'], function (PIXI, data) {
         switch(matrix[i][j]){
           case -2: color = data.get('colors.wall'); break;
           case -1: color = data.get('colors.empty'); break;
-          default: color = data.get('colors.car'); break;
+//          default: color = data.get('colors.car'); break;
+          default: color = parseInt(matrix[i][j], 16); break;
+
+
         }
         graphics.beginFill(color, 1);
         graphics.drawRect(size*i, size*j, size, size);

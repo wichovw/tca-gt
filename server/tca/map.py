@@ -1,5 +1,6 @@
 import tca.cellaut as ca
 from tca.cars import Car
+from tca.semaphores import Semaphore, Light
 from random import randint
 
 ca.GridTopology.background = 0
@@ -8,17 +9,17 @@ ca.GridTopology.border = None
 class StreetTopology(ca.GridTopology):
     intersection = None
     orientation = 0
-    front = {
-        "right": None,
-        "left": None,
-    }
-    back = {
-        "right": None,
-        "left": None,
-    }
+    consumer = False
+    generator = False
     
-    def __init__(self, id, lanes, length, front):
+    def __init__(self, id, lanes, length, front, generator=False):
+        self.front = {}
+        self.back = {'left': None, 'right': None}
         self.id = id
+        if front.get('consumer', False):
+            self.consumer = True
+        if generator:
+            self.generator = True
         self.front_id = front.get('straight', None)
         self.front_offset = front.get('offset', 0)
         self.front['right'] = front.get('right', None)
@@ -75,13 +76,16 @@ class TCATopology(ca.Topology):
     def __init__(self, map):
         self.description = map
         self.streets = {}
+        self.semaphores = []
         for street in map['streets']:
             if street['id'] not in self.streets:
-                top = StreetTopology(street['id'], street['lanes'], street['length'], street['front'])
+                top = StreetTopology(street['id'], street['lanes'], street['length'], street['front'], street['generator'])
                 self.streets[street['id']] = top
             else:
                 raise ValueError("Duplicated street id: %s" % self.id)
                 
+        self.zero = (tuple(self.streets.keys())[0], 0, 0)
+        
         # look for streets on the back
         for street_id, street in self.streets.items():
             front = self.streets.get(street.front_id, None)
@@ -98,9 +102,12 @@ class TCATopology(ca.Topology):
                         street.intersection = back.intersection
                         street.orientation = 3 if direction == 'left' else 1
                         street.front_offset = back.width
+                        street.intersection.semaphore.add(street)
                         break
             if not street.intersection:
                 street.intersection = ca.GridTopology((street.width, street.front_offset))
+                semaphore = Semaphore(street.intersection, street)
+                self.semaphores.append(semaphore)
             
         # populate cars
         for car in range(map['cars']):
@@ -110,18 +117,15 @@ class TCATopology(ca.Topology):
             cell = randint(0, street.height - 1)
             address = (street_id, lane, cell)
             state = Car(street=street_id)
+            state.next_street = street.front_id
             self.set(address, state)
-#        for car in map['cars']:
-#            address = (car['streetId'], car['lane'], car['cell'])
-#            state = Car(speed=car['speed'], street=car['streetId'])
-#            self.set(address, state)
     
     def normalize(self, address):
         street, lane, cell = address
         if type(street) != StreetTopology:
             street = self.streets.get(street, None)
         if not street:
-            raise IndexError
+            return None
         addr = street.normalize((lane, cell))
         if not addr:
             if lane < 0 or lane >= street.width:
@@ -155,7 +159,8 @@ class TCATopology(ca.Topology):
         val = ""
         cars = []
         for street_id, street in self.streets.items():
-            val += '\nStreet %s' % street_id
+            color = 'green' if street.light.color > 0 else 'red'
+            val += '\nStreet %s: %s' % (street_id, color)
             for lane in range(street.width):
                 val += '\n'
                 for cell in range(street.height + street.front_offset):
@@ -174,6 +179,8 @@ class TCATopology(ca.Topology):
                                                              car.change_lane_intention,
                                                              car.street
                                                             )
+        val += "\nTotal cars: %s" % len(cars)
+        
         return val
             
 class TCANeighborhood(ca.ExtendedNeighborhood):

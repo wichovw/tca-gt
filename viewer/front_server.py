@@ -4,7 +4,6 @@ import cherrypy
 PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-
 class Root(object): pass
 		
 

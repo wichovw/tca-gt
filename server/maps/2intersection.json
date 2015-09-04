@@ -1,0 +1,44 @@
+{
+  "name": "4-street Intersection Toroid",
+  "streets": [
+    {
+      "id": 0,
+      "lanes": 2,
+      "length": 20,
+      "front": {
+        "straight": 2,
+        "right": 3,
+        "offset": 2
+      }
+    },
+    {
+      "id": 1,
+      "lanes": 2,
+      "length": 20,
+      "front": {
+        "straight": 3,
+        "left": 2,
+        "offset": 2
+      }
+    },
+    {
+      "id": 2,
+      "lanes": 2,
+      "length": 20,
+      "front": {
+        "straight": 0,
+        "offset": 0
+      }
+    },
+    {
+      "id": 3,
+      "lanes": 2,
+      "length": 20,
+      "front": {
+        "straight": 1,
+        "offset": 0
+      }
+    }
+  ],
+  "cars": 50
+}

@@ -1,0 +1,130 @@
+{
+  "name": "4-Intersection Map",
+  "streets": [
+    {
+      "id": 0,
+      "lanes": 2,
+      "length": 20,
+      "generator": true,
+      "front": {
+        "straight": 1,
+        "right": 7,
+        "offset": 2
+      }
+    },
+    {
+      "id": 1,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "straight": 2,
+        "left": 11,
+        "offset": 2
+      }
+    },
+    {
+      "id": 2,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "consumer": true
+      }
+    },
+    {
+      "id": 3,
+      "lanes": 2,
+      "length": 20,
+      "generator": true,
+      "front": {
+        "straight": 4,
+        "right": 10,
+        "offset": 2
+      }
+    },
+    {
+      "id": 4,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "straight": 5,
+        "left": 8,
+        "offset": 2
+      }
+    },
+    {
+      "id": 5,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "consumer": true
+      }
+    },
+    {
+      "id": 6,
+      "lanes": 2,
+      "length": 20,
+      "generator": true,
+      "front": {
+        "straight": 7,
+        "left": 1,
+        "offset": 2
+      }
+    },
+    {
+      "id": 7,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "straight": 8,
+        "right": 5,
+        "offset": 2
+      }
+    },
+    {
+      "id": 8,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "consumer": true
+      }
+    },
+    {
+      "id": 9,
+      "lanes": 2,
+      "length": 20,
+      "generator": true,
+      "front": {
+        "straight": 10,
+        "left": 4,
+        "offset": 2
+      }
+    },
+    {
+      "id": 10,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "straight": 11,
+        "right": 2,
+        "offset": 2
+      }
+    },
+    {
+      "id": 11,
+      "lanes": 2,
+      "length": 20,
+      "generator": false,
+      "front": {
+        "consumer": true
+      }
+    }
+  ],
+  "cars": 300
+}

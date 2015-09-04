@@ -38,6 +38,7 @@ class GridTopology(Topology):
         self.buffer = []
         for _ in range(self.width):
             self.buffer.append([self.background] * self.height)
+        self.zero = (0, 0)
             
     def normalize(self, address):
         x, y = address
@@ -89,3 +90,4 @@ class Rule:
         
     def apply(self):
         raise NotImplementedError
+        

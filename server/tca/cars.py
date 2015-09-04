@@ -4,6 +4,7 @@ class Car:
     speed = 0
     change_lane_intention = 0
     street = None
+    next_street = None
     
     def __init__(self, **kwargs):
         if 'id' in kwargs:
@@ -16,12 +17,15 @@ class Car:
             self.change_lane_intention = kwargs['change_lane_intention']
         if 'street' in kwargs:
             self.street = kwargs['street']
+        if 'next_street' in kwargs:
+            self.next_street = kwargs['next_street']
             
     def clone(self):
         return Car(id=self.id,
                    speed=self.speed,
                    change_lane_intention=self.change_lane_intention,
-                   street=self.street
+                   street=self.street,
+                   next_street=self.next_street
                   )
     
     def __repr__(self):

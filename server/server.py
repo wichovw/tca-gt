@@ -1,7 +1,7 @@
 import os
 import cherrypy, cherrypy_cors
-from tca_parser import parse
-from tca_renderer import renderStreet, renderIntersection
+from tca_parser import create_map, parse
+from tca_renderer import GridMapRenderer
 from tca.map import TCAMap
 from tca.automaton import TCAAutomaton
 
@@ -9,19 +9,19 @@ class TCAServer(object):
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def start(self, map='intersection'):
-        matrix = parse(map)
+    def start(self, size=2):
+#        matrix = create_map(rows, cols)
+        matrix = parse('totito')
         map = TCAMap(matrix)
         self.automaton = TCAAutomaton(map)
-#        return renderStreet(self.automaton.map, street_id=0)
-        return renderIntersection(self.automaton.map, hstreet_id=0, vstreet_id=1)
+        self.render = GridMapRenderer(map)
+        return self.render.get_matrix()
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def update(self):
         self.automaton.update()
-#        return renderStreet(self.automaton.map, street_id=0)
-        return renderIntersection(self.automaton.map, hstreet_id=0, vstreet_id=1)
+        return self.render.get_matrix()
 
 PATH = os.path.abspath(os.path.dirname(__file__))
 

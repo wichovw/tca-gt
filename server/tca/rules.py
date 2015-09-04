@@ -12,12 +12,20 @@ class StatesRule(TCARule):
     """Rules for calculating new state of non-empty cells"""
     
     def populate(self, map, address):
+        self.address = address
         self.state = map.get(address)
         self.front_gap = 0
         self.street_id = address[0]
+        street = map.streets[address[0]]
+        self.consumer = street.consumer
+        self.generator = street.generator
+        self.street_length = street.height
+        self.street_front_id = street.front_id
 
-
-        for cell in map.states(address, self.vmax)[0]:
+        for i, cell in enumerate(map.states(address, self.vmax)[0]):
+            if address[2] + i + 1 == street.height:
+                if street.light.color <= 0:
+                    break
             if cell == self.background:
                 self.front_gap += 1
             else:
@@ -81,6 +89,16 @@ class StatesRule(TCARule):
         if self.state.street != self.street_id:
             return
         
+        if self.consumer and self.address[2] + 1 >= self.street_length:
+            return self.background
+        
+        if self.generator and self.address[2] == 0:
+            if random.random() > 0.5:
+                state = Car(street=self.street_id)
+                state.next_street = self.street_front_id
+                return state
+    
+        
         self.state.change_lane_intention = 0
 
         car = self.state.clone()
@@ -125,6 +143,7 @@ class MovementRule(TCARule):
         self.back_car = self.background
         
         self.street_id = address[0]
+        self.front_street_id = map.streets[address[0]].front_id
 
         self.address = address
         for cell in map.states(address, self.vmax)[3]:
@@ -165,6 +184,10 @@ class MovementRule(TCARule):
         if self.back_car != self.background and self.back_car is not None:
             if self.back_car.speed == self.back_gap + 1 and self.back_car.change_lane_intention == 0:
                 if self.back_car.street == self.street_id:
+                    return self.back_car
+                if self.back_car.next_street == self.street_id:
+                    self.back_car.street = self.street_id
+                    self.back_car.next_street = self.front_street_id
                     return self.back_car
             
         # return background otherwise
