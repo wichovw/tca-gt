@@ -111,11 +111,11 @@ class StatesRule(TCARule):
         car.speed = min(car.speed, self.front_gap)
         
         # Nasch randomly slowing of vehicle
-        if random.random() < self.random_slow_p:
+        if random.random() < car.probability['random_slow_p']:
             car.speed = max(car.speed - 1, 0)
 
         # TCA_GT changing lane intention
-        if random.random() < self.change_lane_p:
+        if random.random() < car.probability['change_lane_p']:
             # Right allowed
             if self.right_change_allowed and not self.left_change_allowed:
                 car.change_lane_intention = 1
