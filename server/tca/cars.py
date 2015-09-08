@@ -5,11 +5,8 @@ class Car:
     speed = 0
     change_lane_intention = 0
     street = None
-<<<<<<< HEAD
     next_street = None
-=======
     probability = {}
->>>>>>> 7e18850ce339804d207d18b8cb1efaf4a343c188
     
     def __init__(self, **kwargs):
         if 'id' in kwargs:
@@ -22,11 +19,9 @@ class Car:
             self.change_lane_intention = kwargs['change_lane_intention']
         if 'street' in kwargs:
             self.street = kwargs['street']
-<<<<<<< HEAD
+
         if 'next_street' in kwargs:
             self.next_street = kwargs['next_street']
-            
-=======
         if 'probability' in kwargs:
             self.probability = kwargs['probability']
 
@@ -35,17 +30,12 @@ class Car:
         self.probability['change_lane_p'] = random.random()
         self.probability['turn_street_p'] = random.random()
 
-
->>>>>>> 7e18850ce339804d207d18b8cb1efaf4a343c188
     def clone(self):
         return Car(id=self.id,
                    speed=self.speed,
                    change_lane_intention=self.change_lane_intention,
                    street=self.street,
-<<<<<<< HEAD
-                   next_street=self.next_street
-                  )
-=======
+                   next_street=self.next_street,
                    probability=self.probability)
 
     def get_personality_color(self):
@@ -55,7 +45,6 @@ class Car:
         """
         r = lambda: random.randint(0, 255)
         return '#%02X%02X%02X' % (r(), r(), r())
->>>>>>> 7e18850ce339804d207d18b8cb1efaf4a343c188
     
     def __repr__(self):
         return "<Car [%s] s:%d>" % (self.id[:4], self.speed)
