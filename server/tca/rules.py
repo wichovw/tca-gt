@@ -1,5 +1,5 @@
 import random
-import tca.cellaut as ca
+import server.tca.cellaut as ca
 
 class TCARule(ca.Rule):
     
@@ -92,11 +92,11 @@ class StatesRule(TCARule):
         if self.consumer and self.address[2] + 1 >= self.street_length:
             return self.background
         
-        if self.generator and self.address[2] == 0:
-            if random.random() > 0.5:
-                state = Car(street=self.street_id)
-                state.next_street = self.street_front_id
-                return state
+        # if self.generator and self.address[2] == 0:
+        #     if random.random() > 0.5:
+        #         state = Car(street=self.street_id)
+        #         state.next_street = self.street_front_id
+        #         return state
     
         
         self.state.change_lane_intention = 0

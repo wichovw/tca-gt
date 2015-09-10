@@ -1,9 +1,9 @@
 import os
 import cherrypy, cherrypy_cors
-from tca_parser import create_map, parse
-from tca_renderer import GridMapRenderer
-from tca.map import TCAMap
-from tca.automaton import TCAAutomaton
+from server.tca_parser import create_map, parse
+from server.tca_renderer import GridMapRenderer
+from server.tca.map import TCAMap
+from server.tca.automaton import TCAAutomaton
 
 class TCAServer(object):
     

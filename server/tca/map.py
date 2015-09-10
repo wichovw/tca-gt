@@ -1,6 +1,6 @@
-import tca.cellaut as ca
-from tca.cars import Car
-from tca.semaphores import Semaphore, Light
+import server.tca.cellaut as ca
+from server.tca.cars import Car
+from server.tca.semaphores import Semaphore, Light
 from random import randint
 
 ca.GridTopology.background = 0
