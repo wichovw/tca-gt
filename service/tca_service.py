@@ -5,17 +5,32 @@ from server.tca.map import TCAMap
 from server.tca.automaton import TCAAutomaton
 
 
-
 class TCAService(object):
 
-    def start(self, size=2):
-        #        matrix = create_map(rows, cols)
+    @staticmethod
+    def fixed_time_start(self, cycle_count=60):
         matrix = parse('totito')
-        map = TCAMap(matrix)
-        self.automaton = TCAAutomaton(map)
-        self.render = GridMapRenderer(map)
-        return self.render.get_matrix()
+        tca_map = TCAMap(matrix)
+        self.automaton = TCAAutomaton(tca_map)
+        #self.render = GridMapRenderer(map)
+        #self.render.get_matrix()
 
-    def update(self):
-        self.automaton.update()
-        return self.render.get_matrix()
+        for i in range(cycle_count):
+            self.automaton.update()
+
+        return True
+
+    def dynamic_time_start(self):
+        raise NotImplementedError
+
+    def get_traffic_lights(self):
+        raise NotImplementedError
+
+    def get_average_speed(self):
+        raise NotImplementedError
+
+    def get_average_distance(self):
+        raise NotImplementedError
+
+    def get_stopped_time(self):
+        raise NotImplementedError
