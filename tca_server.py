@@ -1,6 +1,6 @@
 import sys
 sys.path.append('server')
-from main import main
+from server.main import main
 
 def serve(argv):
     main(argv)

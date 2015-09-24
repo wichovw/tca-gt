@@ -6,6 +6,8 @@ class Light:
         self.color = 0
         self.street = street
         self.time = time
+        # TODO Add unique ID
+        self.id = None
 
 class Semaphore:
     """a group of syncronized traffic lights that coordinate on the same 

@@ -1,7 +1,7 @@
 import copy
-import tca.cellaut as ca
-from tca.rules import StatesRule, MovementRule
-from logger import logger
+import server.tca.cellaut as ca
+from server.tca.rules import StatesRule, MovementRule
+from server.logger import logger
 
 class TCAAutomaton(ca.Automaton):
     
