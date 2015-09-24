@@ -1,5 +1,6 @@
 import random
 import tca.cellaut as ca
+from tca.cars import Car
 
 class TCARule(ca.Rule):
     
