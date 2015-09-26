@@ -19,11 +19,24 @@ class Automaton:
             cell.rule.apply_()
             
 class Street:
+    id = 0
     cells = []
+    
+    def __init__(self):
+        self.id = Street.id
+        Street.id += 1
+        self.cells = []
+        
+    def __repr__(self):
+        return "<Street: %s>" % (self.id)
     
 class Topology:
     cells = []
     endpoint_cells = []
+    
+    def __init__(self):
+        self.cells = []
+        self.endpoint_cells = []
     
     def get_view(self):
         max_x = 0
@@ -87,7 +100,7 @@ def generate_street(length, rate=0.8):
         
     for i, cell in enumerate(topo.cells):
         street.cells[0].append(cell)
-        cell.viewer_address = (i, 0)
+        cell.viewer_address = [i, 0]
         cell.street = street
         cell.lane = 0
         cell.cell = i
@@ -99,52 +112,23 @@ def generate_street(length, rate=0.8):
             
     return topo
         
-    
-def simple_street(rate=0.8):
+def simple_map(size=5):
     topo = Topology()
     
-    # cells declaration
-    topo.cells.append(cells.StreetEntranceCell())
-    topo.cells.append(cells.StreetCell())
-    topo.cells.append(cells.StreetCell())
-    topo.cells.append(cells.StreetExitCell())
+    street1 = generate_street(size)
+    street2 = generate_street(size)
     
-    topo.endpoint_cells = [topo.cells[0], topo.cells[3]]
+    for cell in street2.cells:
+        cell.viewer_address[0] += size
     
-    street = Street()
-    street.cells = [[topo.cells[0], topo.cells[1], topo.cells[2], topo.cells[3]]]
+    exit = street1.cells[size - 1]
+    entrance = street2.cells[0]
     
-    # cells definition
+    exit.connection = entrance
+    entrance.connection = exit
     
-    topo.cells[0].viewer_address = (0, 0)
-    topo.cells[0].street = street
-    topo.cells[0].lane = 0
-    topo.cells[0].cell = 0
-    topo.cells[0].cells_to_end = 3
-    topo.cells[0].front_cell = topo.cells[1]
+    exit.front_cell = entrance
     
-    topo.cells[1].viewer_address = (1, 0)
-    topo.cells[1].street = street
-    topo.cells[1].lane = 0
-    topo.cells[1].cell = 1
-    topo.cells[1].cells_to_end = 2
-    topo.cells[1].front_cell = topo.cells[2]
-    
-    topo.cells[2].viewer_address = (2, 0)
-    topo.cells[2].street = street
-    topo.cells[2].lane = 0
-    topo.cells[2].cell = 2
-    topo.cells[2].cells_to_end = 1
-    topo.cells[2].front_cell = topo.cells[3]
-    
-    topo.cells[3].viewer_address = (3, 0)
-    topo.cells[3].street = street
-    topo.cells[3].lane = 0
-    topo.cells[3].cell = 3
-    topo.cells[3].cells_to_end = 0
-    topo.cells[3].front_cell = None
-    
-    topo.cells[0].rate = rate
-    topo.cells[3].rate = rate
-    
+    topo.cells = street1.cells + street2.cells
+    topo.endpoint_cells = [street1.cells[0], street2.cells[size - 1]]
     return topo

@@ -37,7 +37,7 @@ class StreetCell(Cell):
         cells = self.street.cells[self.lane][self.cell + 1 :]
         dif = n - len(cells)
         if dif > 0 and cells[-1].front_cell is not None:
-                cells += cells[-1].get_front_cells(dif)
+            cells += cells[-1].get_front_cells(dif)
         return cells[:n]
     
 class IntersectionCell(Cell):
@@ -58,7 +58,9 @@ class EndpointExitCell(EndpointCell):
     
     def get_front_cells(self, n):
         if self.connection is None:
-            return [None] * n
+            return []
+        elif isinstance(self.connection, StreetCell):
+            return [self.connection] + self.connection.get_front_cells(n - 1)
         else:
             raise NotImplementedError
     

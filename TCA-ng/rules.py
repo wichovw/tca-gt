@@ -33,9 +33,8 @@ class StreetRule(Rule):
             return
         self.front_gap = 0
         self.front_cells = self.cell.get_front_cells(self.car.v_max)
+#        print(self.cell, self.front_cells)
         for cell in self.front_cells:
-            if cell is None:
-                break
             if cell.car is not None:
                 break
             self.front_gap += 1

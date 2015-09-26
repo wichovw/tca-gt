@@ -7,7 +7,7 @@ class TCAServer(object):
     @cherrypy.tools.json_out()
     def start(self):
         self.automaton = example_maps.Automaton()
-        self.automaton.topology = example_maps.generate_street(20)
+        self.automaton.topology = example_maps.simple_map(20)
         return self.automaton.topology.json_view()
     
     @cherrypy.expose
