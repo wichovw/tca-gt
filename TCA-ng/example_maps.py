@@ -8,7 +8,7 @@ class Topology:
     cells = []
     endpoint_cells = []
     
-    def text_view(self):
+    def get_view(self):
         max_x = 0
         max_y = 0
         for cell in self.cells:
@@ -18,15 +18,12 @@ class Topology:
         grid = [[""]*max_x for _ in range(max_y)]
 
         for cell in self.cells:
-            grid[cell.viewer_address[1]][cell.viewer_address[0]] = 0 if not cell.car else 1
-#            grid[cell.viewer_address[1]][cell.viewer_address[0]] = cell.id
-
-        string = ""
-        for y in grid:
-            for x in y:
-                string += "%3s" % x
-            string += "\n"
-            
+            grid[cell.viewer_address[1]][cell.viewer_address[0]] = '.' if not cell.car else cell.car.speed
+        return grid
+    
+    def text_view(self):
+        grid = self.get_view()
+        string = '\n'.join(''.join('%3s' % x for x in y) for y in grid)
         return string
     
 def simple_street(rate=0.8):
