@@ -1,38 +1,49 @@
-
-
-INT_ENTRANCE_CELL = 1
-INT_EXIT_CELL = 2
-INT_INNER_CELL = 3
-
-MAP_ENTRANCE_CELL = 4
-MAP_EXIT_CELL = 5
+import rules
 
 class Cell:
+    id = 0
     car = None
     viewer_address = None
-    generation_rate = 0
-    consumption_rate = 0
+    rule = None
+    
+    def __init__(self):
+        self.id = Cell.id
+        Cell.id += 1
+    
+    def __repr__(self):
+        return "<Cell: %s>" % self.id
     
 class StreetCell(Cell):
+    rule = rules.StreetRule
     street = None
     lane = None
-    cell_from_start = None
+    cell = None
     cells_to_end = None
-    front_cells = None
-    back_cells = None
-    right_cell = None
-    left_cell = None
+    front_cell = None
     
 class IntersectionCell(Cell):
-    type_ = None
+    rule = rules.IntersectionRule
     routes = None
     indexes = None
     
-    def front_cells(self, route):
-        index = self.indexes[routes.index(route)]
-        return route.cells[index:]
-    
 class EndpointCell(Cell):
-    type_ = None
     rate = 0
     connection = None
+    
+class EndpointEntranceCell(EndpointCell):
+    rule = rules.EntranceRule
+    
+class EndpointExitCell(EndpointCell):
+    rule = rules.ExitRule
+    
+class StreetEntranceCell(EndpointEntranceCell, StreetCell):
+    pass
+    
+class StreetExitCell(EndpointExitCell, StreetCell):
+    pass
+
+class IntersectionEntranceCell(EndpointEntranceCell, IntersectionCell):
+    pass
+
+class IntersectionExitCell(EndpointExitCell, IntersectionCell):
+    pass
