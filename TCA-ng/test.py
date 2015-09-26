@@ -1,4 +1,4 @@
-from example_maps import simple_street, Automaton
+from example_maps import generate_street, Automaton
 import random
 import cells
 import cars
@@ -6,7 +6,7 @@ import rules
 
 if __name__ == "__main__":
     tca = Automaton()
-    topo = simple_street()
+    topo = generate_street(5)
     tca.topology = topo
     print(topo.text_view())
     

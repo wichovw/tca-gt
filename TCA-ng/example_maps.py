@@ -68,6 +68,38 @@ class Topology:
         string = '\n'.join(''.join('%3s' % x for x in y) for y in grid)
         return string
     
+
+def generate_street(length, rate=0.8):
+    topo = Topology()
+    
+    # cells declaration
+    entrance = cells.StreetEntranceCell()
+    topo.cells.append(entrance)
+    topo.endpoint_cells.append(entrance)
+    for _ in range(length - 2):
+        topo.cells.append(cells.StreetCell())
+    exit = cells.StreetExitCell()
+    topo.cells.append(exit)
+    topo.endpoint_cells.append(exit)
+    
+    street = Street()
+    street.cells.append([])
+        
+    for i, cell in enumerate(topo.cells):
+        street.cells[0].append(cell)
+        cell.viewer_address = (i, 0)
+        cell.street = street
+        cell.lane = 0
+        cell.cell = i
+        cell.cells_to_end = length - i
+        if i + 1 < len(topo.cells):
+            cells.front_cell = topo.cells[i + 1]
+        if isinstance(cell, cells.EndpointCell):
+            cell.rate = rate
+            
+    return topo
+        
+    
 def simple_street(rate=0.8):
     topo = Topology()
     
