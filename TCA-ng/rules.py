@@ -64,7 +64,42 @@ class StreetRule(Rule):
                 self.cell.p.car = None
     
 class IntersectionRule(Rule):
-    pass
+    front_gap = 0
+    front_cells = []
+    
+    def populate(self):
+        if self.car is None:
+            return
+        self.front_gap = 0
+        self.front_cells = self.cell.get_front_cells(self.car.v_max, self.car.route)
+        for cell in self.front_cells:
+            if cell.car is not None:
+                break
+            self.front_gap += 1
+            
+    def calculate(self):
+        if self.car is None:
+            return
+        self.nasch_rules()
+            
+    def nasch_rules(self):
+        # rule 1 (acceleration):
+        self.car.p.speed = min(self.car.p.speed + 1, self.car.v_max)
+        
+        # rule 2 (collide avoidance)
+        self.car.p.speed = min(self.car.p.speed, self.front_gap)
+        
+        # rule 3 (stochastic deceleration)
+        if random.random() < self.car.decelerate_rate:
+            self.car.p.speed = max(0, self.car.p.speed - 1)
+            
+        # move car
+        if self.car.p.speed > 0:
+            self.car.p.cell = self.front_cells[self.car.p.speed - 1]
+            self.car.p.cell.p.car = self.car
+            self.car.p.cell.p.recipient = True
+            if not self.cell.p.recipient:
+                self.cell.p.car = None
     
 class EntranceRule(Rule):
     generate = False

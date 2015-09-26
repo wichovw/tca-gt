@@ -36,14 +36,23 @@ class StreetCell(Cell):
     def get_front_cells(self, n):
         cells = self.street.cells[self.lane][self.cell + 1 :]
         dif = n - len(cells)
-        if dif > 0 and cells[-1].front_cell is not None:
+        if dif > 0 and cells[-1].connection is not None:
             cells += cells[-1].get_front_cells(dif)
         return cells[:n]
     
 class IntersectionCell(Cell):
     rule_class = rules.IntersectionRule
     routes = None
-    indexes = None
+    intersection = None
+    
+    def get_front_cells(self, n, route=None):
+        if route is None:
+            route = self.intersection.get_valid_route(self)
+        cells = route.cells[route.cells.index(self) + 1 :]
+        dif = n - len(cells)
+        if dif > 0 and cells[-1].connection is not None:
+            cells += cells[-1].get_front_cells(dif)
+        return cells[:n]
     
 class EndpointCell(Cell):
     rate = 0
@@ -56,11 +65,13 @@ class EndpointEntranceCell(EndpointCell):
 class EndpointExitCell(EndpointCell):
     endpoint_rule_class = rules.ExitRule
     
-    def get_front_cells(self, n):
+    def get_front_cells(self, n, route=None):
         if self.connection is None:
             return []
         elif isinstance(self.connection, StreetCell):
             return [self.connection] + self.connection.get_front_cells(n - 1)
+        elif isinstance(self.connection, IntersectionCell):
+            return [self.connection] + self.connection.get_front_cells(n - 1, route)
         else:
             raise NotImplementedError
     
