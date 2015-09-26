@@ -1,10 +1,18 @@
 import rules
 
+class ProvisionalCell:
+    car = None
+    
+    def __init__(self, cell):
+        self.car = cell.car
+
 class Cell:
     id = 0
     car = None
     viewer_address = None
     rule = None
+    rule_class = None
+    p = None
     
     def __init__(self):
         self.id = Cell.id
@@ -13,8 +21,11 @@ class Cell:
     def __repr__(self):
         return "<Cell: %s>" % self.id
     
+    def apply_rules():
+        cell.car = cell.p.car
+    
 class StreetCell(Cell):
-    rule = rules.StreetRule
+    rule_class = rules.StreetRule
     street = None
     lane = None
     cell = None
@@ -22,7 +33,7 @@ class StreetCell(Cell):
     front_cell = None
     
 class IntersectionCell(Cell):
-    rule = rules.IntersectionRule
+    rule_class = rules.IntersectionRule
     routes = None
     indexes = None
     
@@ -31,10 +42,11 @@ class EndpointCell(Cell):
     connection = None
     
 class EndpointEntranceCell(EndpointCell):
-    rule = rules.EntranceRule
+    endpoint_rule_class = rules.EntranceRule
+    speed = 1
     
 class EndpointExitCell(EndpointCell):
-    rule = rules.ExitRule
+    endpoint_rule_class = rules.ExitRule
     
 class StreetEntranceCell(EndpointEntranceCell, StreetCell):
     pass

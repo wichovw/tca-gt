@@ -1,15 +1,8 @@
 import cells
 import random
 
-class Route:
-    cells = []
-
 class Street:
     cells = []
-    exit_routes = []
-    
-    def get_route(self):
-        return random.choice(self.exit_routes)
     
 class Topology:
     cells = []

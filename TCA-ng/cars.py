@@ -1,4 +1,9 @@
 
+class ProvisionalCar:
+    speed = 0
+    
+    def __init__(self, car):
+        self.speed = car.speed
 
 class Car:
     id = 0
@@ -15,5 +20,6 @@ class Car:
     def __repr__(self):
         return "<Car: %s (%s)>" % (self.id, self.speed)
     
-class ProvisionalCar:
-    speed = 0
+    def apply_rules():
+        car.speed = car.p.speed
+    
