@@ -1,6 +1,23 @@
 import cells
 import random
 
+class Automaton:
+    topology = None
+    
+    def update(self):
+        for cell in self.topology.endpoint_cells:
+            rule = cell.endpoint_rule_class(cell)
+            rule.apply_()
+
+        for cell in self.topology.cells:
+            cell.rule = cell.rule_class(cell)
+
+        for cell in self.topology.cells:
+            cell.rule.calculate()
+
+        for cell in self.topology.cells:
+            cell.rule.apply_()
+            
 class Street:
     cells = []
     
@@ -19,6 +36,31 @@ class Topology:
 
         for cell in self.cells:
             grid[cell.viewer_address[1]][cell.viewer_address[0]] = '.' if not cell.car else cell.car.speed
+        return grid
+    
+    def json_view(self):
+        max_x = 0
+        max_y = 0
+        for cell in self.cells:
+            max_x = max(max_x, cell.viewer_address[0] + 1)
+            max_y = max(max_y, cell.viewer_address[1] + 1)
+            
+        grid = [[-2]*max_y for _ in range(max_x)]
+        
+        for cell in self.cells:
+            x = cell.viewer_address[0]
+            y = cell.viewer_address[1]
+            color = -1
+            if isinstance(cell, cells.EndpointEntranceCell):
+                color = 'bb99bb'
+            elif isinstance(cell, cells.EndpointExitCell):
+                color = 'ffbb33'
+            elif isinstance(cell, cells.IntersectionCell):
+                color = 'dddddd'
+            if cell.car is not None:
+                color = '99cc99'
+            grid[x][y] = color
+                
         return grid
     
     def text_view(self):

@@ -9,7 +9,7 @@ define(['pixi', './data'], function (PIXI, data) {
     for (var i = 0; i < matrix.length; i++){
       for(var j = 0; j < matrix[0].length; j++){
         //Paint color according to type
-        switch(matrix[i][j]){
+        switch(matrix[j][i]){
           case -2: color = data.get('colors.wall'); break;
           case -1: color = data.get('colors.empty'); break;
 //          default: color = data.get('colors.car'); break;
