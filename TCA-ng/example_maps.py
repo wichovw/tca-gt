@@ -18,6 +18,7 @@ def generate_street(length, rate=0.8):
         
     for i, cell in enumerate(topo.cells):
         street.cells[0].append(cell)
+        cell.topology = topo
         cell.viewer_address = [i, 0]
         cell.street = street
         cell.lane = 0
@@ -61,26 +62,31 @@ def simple_intersection(rate=0.8):
     routes[3].cells = [topo.cells[1], topo.cells[4], topo.cells[2]]
     
     topo.cells[0].viewer_address = [0, 1]
+    topo.cells[0].topology = topo
     topo.cells[0].intersection = int_
     topo.cells[0].routes = [routes[0], routes[1]]
     topo.cells[0].rate = rate
     
     topo.cells[1].viewer_address = [1, 0]
+    topo.cells[1].topology = topo
     topo.cells[1].intersection = int_
     topo.cells[1].routes = [routes[2], routes[3]]
     topo.cells[1].rate = rate
     
     topo.cells[2].viewer_address = [2, 1]
+    topo.cells[2].topology = topo
     topo.cells[2].intersection = int_
     topo.cells[2].routes = [routes[0], routes[3]]
     topo.cells[2].rate = rate
     
     topo.cells[3].viewer_address = [1, 2]
+    topo.cells[3].topology = topo
     topo.cells[3].intersection = int_
     topo.cells[3].routes = [routes[1], routes[2]]
     topo.cells[3].rate = rate
     
     topo.cells[4].viewer_address = [1, 1]
+    topo.cells[4].topology = topo
     topo.cells[4].intersection = int_
     topo.cells[4].routes = [routes[0], routes[1], routes[2], routes[3]]
     
@@ -91,11 +97,12 @@ def simple_intersection(rate=0.8):
     semaphore.states = lights
     topo.lights = lights
     
-    lights.append(models.Light(10))
-    lights.append(models.Light(10))
+    lights.append(models.Light(20))
+    lights.append(models.Light(20))
     
     lights[0].viewer_address = [0, 2]
     lights[0].routes = [routes[0], routes[1]]
+    lights[0].free = True
     
     lights[1].viewer_address = [0, 0]
     lights[1].routes = [routes[2], routes[3]]
@@ -164,8 +171,70 @@ def simple_map(size=5):
         
     topo.lights = int_.lights
     topo.semaphores = int_.semaphores
+    
+    for cell in topo.cells:
+        cell.topology = topo
         
     return topo
+
+def totito_map(size=5):
+    topo = models.Topology()
+    
+    crosses = []
+    crosses.append(simple_map(size))
+    crosses.append(simple_map(size))
+    crosses.append(simple_map(size))
+    crosses.append(simple_map(size))
+    
+    side = size * 2 + 2
+    for cell in crosses[1].cells + crosses[1].lights:
+        y = cell.viewer_address[1]
+        cell.viewer_address[1] = side - cell.viewer_address[0]
+        cell.viewer_address[0] = y + side + 1
+    for cell in crosses[2].cells + crosses[2].lights:
+        cell.viewer_address[0] = side * 2 - cell.viewer_address[0] + 1
+        cell.viewer_address[1] = side * 2 - cell.viewer_address[1] + 1
+    for cell in crosses[3].cells + crosses[3].lights:
+        x = cell.viewer_address[0]
+        cell.viewer_address[0] = side - cell.viewer_address[1]
+        cell.viewer_address[1] = x + side + 1
+        
+    crosses[0].cells[3 * size - 1].connection = crosses[1].cells[size]
+    crosses[2].cells[3 * size - 1].connection = crosses[3].cells[size]
+    crosses[0].cells[4 * size - 1].connection = crosses[3].cells[0]
+    crosses[2].cells[4 * size - 1].connection = crosses[1].cells[0]
+    
+    crosses[0].cells[3 * size - 1].front_cell = crosses[1].cells[size]
+    crosses[2].cells[3 * size - 1].front_cell = crosses[3].cells[size]
+    crosses[0].cells[4 * size - 1].front_cell = crosses[3].cells[0]
+    crosses[2].cells[4 * size - 1].front_cell = crosses[1].cells[0]
+    
+    crosses[1].cells[size].connection = crosses[0].cells[3 * size - 1]
+    crosses[3].cells[size].connection = crosses[2].cells[3 * size - 1]
+    crosses[3].cells[0].connection = crosses[0].cells[4 * size - 1]
+    crosses[1].cells[0].connection = crosses[2].cells[4 * size - 1]
+    
+    for cross in crosses:
+        topo.cells += cross.cells
+        topo.lights += cross.lights
+        topo.semaphores += cross.semaphores
+        
+    topo.endpoint_cells = [
+        crosses[0].cells[0],
+        crosses[0].cells[size],
+        crosses[1].cells[3 * size - 1],
+        crosses[1].cells[4 * size - 1],
+        crosses[2].cells[0],
+        crosses[2].cells[size],
+        crosses[3].cells[3 * size - 1],
+        crosses[3].cells[4 * size - 1],
+    ]
+    
+    for cell in topo.cells:
+        cell.topology = topo
+    
+    return topo
+    
         
 def simple_2_streets(size=5):
     topo = models.Topology()
@@ -186,4 +255,8 @@ def simple_2_streets(size=5):
     
     topo.cells = street1.cells + street2.cells
     topo.endpoint_cells = [street1.cells[0], street2.cells[size - 1]]
+    
+    for cell in topo.cells:
+        cell.topology = topo
+        
     return topo

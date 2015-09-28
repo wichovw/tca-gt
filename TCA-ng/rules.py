@@ -16,7 +16,10 @@ class Rule:
         self.populate()
     
     def populate(self):
+        if self.car is None:
+            return
         self.front_gap = 0
+        self.front_cells = self.cell.get_front_cells(self.car.v_max, self.car.route)
         for cell in self.front_cells:
             if cell.car is not None:
                 break
@@ -52,18 +55,10 @@ class Rule:
             self.car.apply_rules()
             
 class StreetRule(Rule):
-    def populate(self):
-        if self.car is None:
-            return
-        self.front_cells = self.cell.get_front_cells(self.car.v_max)
-        super().populate()
+    pass
     
 class IntersectionRule(Rule):
-    def populate(self):
-        if self.car is None:
-            return
-        self.front_cells = self.cell.get_front_cells(self.car.v_max, self.car.route)
-        super().populate()
+    pass
     
 class EntranceRule(Rule):
     generate = False
@@ -88,6 +83,7 @@ class EntranceRule(Rule):
             self.cell.car = car
             if self.is_street:
                 self.cell.street.car_entry(car)
+            self.cell.topology.cars.append(car)
     
 class ExitRule(Rule):
     consume = False
@@ -103,5 +99,6 @@ class ExitRule(Rule):
             
     def apply_(self):
         if self.consume:
+            self.cell.topology.cars.remove(self.car)
             self.cell.car = None
             self.car.cell = None

@@ -88,13 +88,15 @@ class Semaphore:
     def __repr__(self):
         return "<Semaphore: %s>" % (self.id)
     
+    def get_active_light(self):
+        return self.states[self.active]
+    
     def update(self):
         self.counter += 1
-        light = self.states[self.active]
-        if light.time < self.counter:
+        if self.get_active_light().time < self.counter:
+            self.get_active_light().free = False
             self.active = (self.active + 1) % len(self.states)
-            light.free = False
-            self.states[self.active].free = True
+            self.get_active_light().free = True
             self.counter = 0
     
 class Light:
@@ -119,12 +121,14 @@ class Topology:
     endpoint_cells = []
     lights = []
     semaphores = []
+    cars = []
     
     def __init__(self):
         self.cells = []
         self.endpoint_cells = []
         self.lights = []
         self.semaphores = []
+        self.cars = []
     
     def get_view(self, desc=False):
         max_x = 0

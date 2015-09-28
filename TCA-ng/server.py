@@ -8,13 +8,25 @@ class TCAServer(object):
     @cherrypy.tools.json_out()
     def start(self):
         self.automaton = models.Automaton()
-        self.automaton.topology = example_maps.simple_map(20)
+        self.automaton.topology = example_maps.totito_map(10)
         return self.automaton.topology.json_view()
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def update(self):
         self.automaton.update()
+        
+        print()
+        print(len(self.automaton.topology.cars))
+        for car in self.automaton.topology.cars:
+            if car.id % 10 == 0:
+                print('car %3s %8s route: %s' % (
+                        car.id,
+                        tuple(car.cell.viewer_address),
+                        car.route
+                ))
+        print()
+        
         return self.automaton.topology.json_view()
     
 PATH = os.path.abspath(os.path.dirname(__file__))

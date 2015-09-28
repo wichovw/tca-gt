@@ -14,6 +14,7 @@ class Cell:
     rule = None
     rule_class = None
     p = None
+    topology = None
     
     def __init__(self):
         self.id = Cell.id
@@ -33,11 +34,11 @@ class StreetCell(Cell):
     cells_to_end = None
     front_cell = None
     
-    def get_front_cells(self, n):
+    def get_front_cells(self, n, route=None):
         cells = self.street.cells[self.lane][self.cell + 1 :]
         dif = n - len(cells)
         if dif > 0 and cells[-1].connection is not None:
-            cells += cells[-1].get_front_cells(dif)
+            cells += cells[-1].get_front_cells(dif, route)
         return cells[:n]
     
 class IntersectionCell(Cell):
@@ -51,7 +52,7 @@ class IntersectionCell(Cell):
         cells = route.cells[route.cells.index(self) + 1 :]
         dif = n - len(cells)
         if dif > 0 and cells[-1].connection is not None:
-            cells += cells[-1].get_front_cells(dif)
+            cells += cells[-1].get_front_cells(dif, route)
         return cells[:n]
     
 class EndpointCell(Cell):
@@ -69,9 +70,12 @@ class EndpointExitCell(EndpointCell):
         if self.connection is None:
             return []
         elif isinstance(self.connection, StreetCell):
-            return [self.connection] + self.connection.get_front_cells(n - 1)
-        elif isinstance(self.connection, IntersectionCell):
             return [self.connection] + self.connection.get_front_cells(n - 1, route)
+        elif isinstance(self.connection, IntersectionCell):
+            if route in self.connection.intersection.semaphore.get_active_light().routes:
+                return [self.connection] + self.connection.get_front_cells(n - 1, route)
+            else:
+                return []
         else:
             raise NotImplementedError
     

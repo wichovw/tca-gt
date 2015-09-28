@@ -7,29 +7,13 @@ import models
 
 if __name__ == "__main__":
     tca = models.Automaton()
-    topo = example_maps.simple_map()
-#    topo = example_maps.simple_2_streets()
+    topo = example_maps.totito_map()
     tca.topology = topo
-    print(topo.text_view())
     
-    for cell in topo.cells:
-        print(cell, cell.get_front_cells(3))
+    print(topo.text_view(desc=True))
     
-    for _ in range(10):
+    for _ in range(1000):
         tca.update()
         print(topo.text_view())
-        
-    s = set()
-    cars = []
-    for cell in topo.cells:
-        if isinstance(cell, cells.StreetCell):
-            s.add(cell.street)
-        if cell.car:
-            cars.append(cell.car)
             
     print(topo.text_view(desc=True))
-            
-    for car in sorted(cars, key=lambda x: x.cell.id):
-        print(car.cell, car.route)
-        
-    print(topo.lights)
