@@ -84,6 +84,22 @@ def simple_intersection(rate=0.8):
     topo.cells[4].intersection = int_
     topo.cells[4].routes = [routes[0], routes[1], routes[2], routes[3]]
     
+    semaphore = models.Semaphore()
+    int_.semaphore = semaphore
+    topo.semaphores = [semaphore,]
+    lights = []
+    semaphore.states = lights
+    topo.lights = lights
+    
+    lights.append(models.Light(10))
+    lights.append(models.Light(10))
+    
+    lights[0].viewer_address = [0, 2]
+    lights[0].routes = [routes[0], routes[1]]
+    
+    lights[1].viewer_address = [0, 0]
+    lights[1].routes = [routes[2], routes[3]]
+    
     return topo
         
 def simple_map(size=5):
@@ -115,7 +131,7 @@ def simple_map(size=5):
         cell.viewer_address[0] = size + 1
         cell.viewer_address[1] = x + size + 3
         
-    for cell in int_.cells:
+    for cell in int_.cells + int_.lights:
         cell.viewer_address[0] += size
         cell.viewer_address[1] += size
         
@@ -145,6 +161,9 @@ def simple_map(size=5):
         streets[2].cells[-1],
         streets[3].cells[-1],
     ]
+        
+    topo.lights = int_.lights
+    topo.semaphores = int_.semaphores
         
     return topo
         

@@ -31,3 +31,5 @@ if __name__ == "__main__":
             
     for car in sorted(cars, key=lambda x: x.cell.id):
         print(car.cell, car.route)
+        
+    print(topo.lights)

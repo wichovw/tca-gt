@@ -18,6 +18,9 @@ class Automaton:
         for cell in self.topology.cells:
             cell.rule.apply_()
             
+        for semaphore in self.topology.semaphores:
+            semaphore.update()
+            
 class Street:
     id = 0
     cells = []
@@ -54,6 +57,7 @@ class Intersection:
     id = 0
     cells = []
     routes = []
+    semaphore = None
     
     def __init__(self):
         self.id = Intersection.id
@@ -69,14 +73,58 @@ class Intersection:
             if cell in route.cells:
                 return route
         raise KeyError
+        
+class Semaphore:
+    id = 0
+    states = []
+    counter = 0
+    active = 0
+    
+    def __init__(self):
+        self.id = Semaphore.id
+        Semaphore.id += 1
+        self.states = []
+        
+    def __repr__(self):
+        return "<Semaphore: %s>" % (self.id)
+    
+    def update(self):
+        self.counter += 1
+        light = self.states[self.active]
+        if light.time < self.counter:
+            self.active = (self.active + 1) % len(self.states)
+            light.free = False
+            self.states[self.active].free = True
+            self.counter = 0
+    
+class Light:
+    id = 0
+    routes = []
+    time = 0
+    viewer_address = None
+    free = False
+    semaphore = None
+    
+    def __init__(self, time):
+        self.id = Light.id
+        Light.id += 1
+        self.routes = []
+        self.time = time
+        
+    def __repr__(self):
+        return "<Light: %s (%s)>" % (self.id, 1 if self.free else 0)
     
 class Topology:
     cells = []
     endpoint_cells = []
+    lights = []
+    semaphores = []
     
     def __init__(self):
         self.cells = []
         self.endpoint_cells = []
+        self.lights = []
+        self.semaphores = []
     
     def get_view(self, desc=False):
         max_x = 0
@@ -102,6 +150,16 @@ class Topology:
             
         grid = [[-2]*max_y for _ in range(max_x)]
         
+        for light in self.lights:
+            x = light.viewer_address[0]
+            y = light.viewer_address[1]
+            color = -1
+            if light.free:
+                color = '00ff00'
+            else:
+                color = 'ff0000'
+            grid[x][y] = color
+        
         for cell in self.cells:
             x = cell.viewer_address[0]
             y = cell.viewer_address[1]
@@ -114,6 +172,8 @@ class Topology:
                 color = 'dddddd'
             if cell.car is not None:
                 color = '99cc99'
+                if cell.car.id % 10 == 0:
+                    color = '555599'
             grid[x][y] = color
                 
         return grid
