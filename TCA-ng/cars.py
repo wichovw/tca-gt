@@ -1,3 +1,4 @@
+import cells
 
 class ProvisionalCar:
     speed = 0
@@ -25,6 +26,10 @@ class Car:
         return "<Car: %s (%s)>" % (self.id, self.speed)
     
     def apply_rules(self):
+        if isinstance(self.p.cell, cells.StreetCell):
+            if not isinstance(self.cell, cells.StreetCell) or (
+                self.cell.street != self.p.cell.street
+            ):
+                    self.p.cell.street.car_entry(self)
         self.speed = self.p.speed
         self.cell = self.p.cell
-    

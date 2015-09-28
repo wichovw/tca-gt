@@ -1,12 +1,13 @@
 import cherrypy, cherrypy_cors, os
 import example_maps
+import models
 
 class TCAServer(object):
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def start(self):
-        self.automaton = example_maps.Automaton()
+        self.automaton = models.Automaton()
         self.automaton.topology = example_maps.simple_map(20)
         return self.automaton.topology.json_view()
     
