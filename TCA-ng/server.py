@@ -1,6 +1,7 @@
 import cherrypy, cherrypy_cors, os
 import example_maps
 import models
+import random
 
 class TCAServer(object):
     
@@ -17,7 +18,7 @@ class TCAServer(object):
         self.automaton.update()
         
         print()
-        print(len(self.automaton.topology.cars))
+        print('total cars', len(self.automaton.topology.cars))
         for car in self.automaton.topology.cars:
             if car.id % 10 == 0:
                 print('car %3s %8s route: %s' % (
@@ -25,6 +26,12 @@ class TCAServer(object):
                         tuple(car.cell.viewer_address),
                         car.route
                 ))
+        
+        # modify a light
+        light = random.choice(self.automaton.topology.lights)
+        change = random.randint(-2, 2)
+        print(light, light.time, change)
+        light.time += change
         print()
         
         return self.automaton.topology.json_view()
