@@ -1,5 +1,6 @@
 import random
-import cells
+import tca_ng.cells
+
 
 class Automaton:
     topology = None
@@ -20,7 +21,8 @@ class Automaton:
             
         for semaphore in self.topology.semaphores:
             semaphore.update()
-            
+
+
 class Street:
     id = 0
     cells = []
@@ -33,14 +35,15 @@ class Street:
         self.exit_routes = []
         
     def __repr__(self):
-        return "<Street: %s>" % (self.id)
+        return "<Street: %s>" % self.id
     
     def car_entry(self, car):
         if len(self.exit_routes) > 0:
             car.route = random.choice(self.exit_routes)
         else:
             car.route = None
-    
+
+
 class Route:
     id = 0
     cells = []
@@ -52,7 +55,8 @@ class Route:
         
     def __repr__(self):
         return "<Route: %s>" % (self.id)
-    
+
+
 class Intersection:
     id = 0
     cells = []
@@ -73,7 +77,8 @@ class Intersection:
             if cell in route.cells:
                 return route
         raise KeyError
-        
+
+
 class Semaphore:
     id = 0
     states = []
@@ -98,7 +103,8 @@ class Semaphore:
             self.active = (self.active + 1) % len(self.states)
             self.get_active_light().free = True
             self.counter = 0
-    
+
+
 class Light:
     id = 0
     routes = []
@@ -115,7 +121,8 @@ class Light:
         
     def __repr__(self):
         return "<Light: %s (%s)>" % (self.id, 1 if self.free else 0)
-    
+
+
 class Topology:
     cells = []
     endpoint_cells = []
@@ -168,11 +175,11 @@ class Topology:
             x = cell.viewer_address[0]
             y = cell.viewer_address[1]
             color = -1
-            if isinstance(cell, cells.EndpointEntranceCell):
+            if isinstance(cell, tca_ng.cells.EndpointEntranceCell):
                 color = 'bb99bb'
-            elif isinstance(cell, cells.EndpointExitCell):
+            elif isinstance(cell, tca_ng.cells.EndpointExitCell):
                 color = 'ffbb33'
-            elif isinstance(cell, cells.IntersectionCell):
+            elif isinstance(cell, tca_ng.cells.IntersectionCell):
                 color = 'dddddd'
             if cell.car is not None:
                 color = '99cc99'
@@ -186,4 +193,4 @@ class Topology:
         grid = self.get_view(desc=desc)
         string = '\n'.join(''.join('%3s' % x for x in y) for y in grid)
         return string
-    
+

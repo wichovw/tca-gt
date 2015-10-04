@@ -1,4 +1,4 @@
-import example_maps 
+import tca_ng.example_maps
 import random
 import cells
 import cars
@@ -7,7 +7,7 @@ import models
 
 if __name__ == "__main__":
     tca = models.Automaton()
-    topo = example_maps.totito_map()
+    topo = tca_ng.example_maps.totito_map()
     tca.topology = topo
     
     print(topo.text_view(desc=True))

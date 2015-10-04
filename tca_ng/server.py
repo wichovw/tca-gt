@@ -1,15 +1,16 @@
 import cherrypy, cherrypy_cors, os
-import example_maps
-import models
+import tca_ng.example_maps
+import tca_ng.models
 import random
+
 
 class TCAServer(object):
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def start(self):
-        self.automaton = models.Automaton()
-        self.automaton.topology = example_maps.totito_map(10)
+        self.automaton = tca_ng.models.Automaton()
+        self.automaton.topology = tca_ng.example_maps.totito_map(10)
         return self.automaton.topology.json_view()
     
     @cherrypy.expose
@@ -38,6 +39,7 @@ class TCAServer(object):
     
 PATH = os.path.abspath(os.path.dirname(__file__))
 
+
 def serve(ip, port):
     cherrypy_cors.install()
     config = {
@@ -55,3 +57,4 @@ def serve(ip, port):
     
 if __name__ == '__main__':
     serve('localhost', 5555)
+

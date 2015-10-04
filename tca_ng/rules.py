@@ -1,5 +1,6 @@
-import cells, cars
+import tca_ng.cells, tca_ng.cars
 import random
+
 
 class Rule:
     cell = None
@@ -9,10 +10,10 @@ class Rule:
     
     def __init__(self, cell):
         self.cell = cell
-        self.cell.p = cells.ProvisionalCell(self.cell)
+        self.cell.p = tca_ng.cells.ProvisionalCell(self.cell)
         if cell.car is not None:
             self.car = cell.car
-            self.car.p = cars.ProvisionalCar(self.car)
+            self.car.p = tca_ng.cars.ProvisionalCar(self.car)
         self.populate()
     
     def populate(self):
@@ -53,13 +54,16 @@ class Rule:
         self.cell.apply_rules()
         if self.car is not None:
             self.car.apply_rules()
-            
+
+
 class StreetRule(Rule):
     pass
-    
+
+
 class IntersectionRule(Rule):
     pass
-    
+
+
 class EntranceRule(Rule):
     generate = False
     is_street = False
@@ -72,19 +76,20 @@ class EntranceRule(Rule):
             return
         if random.random() <= self.cell.rate:
             self.generate = True
-        if isinstance(self.cell, cells.StreetCell):
+        if isinstance(self.cell, tca_ng.cells.StreetCell):
             self.is_street = True
             
     def apply_(self):
         if self.generate:
-            car = cars.Car()
+            car = tca_ng.cars.Car()
             car.cell = self.cell
             car.speed = self.cell.speed
             self.cell.car = car
             if self.is_street:
                 self.cell.street.car_entry(car)
             self.cell.topology.cars.append(car)
-    
+
+
 class ExitRule(Rule):
     consume = False
     

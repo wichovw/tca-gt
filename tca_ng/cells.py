@@ -1,4 +1,5 @@
-import rules
+import tca_ng.rules
+
 
 class ProvisionalCell:
     car = None
@@ -6,6 +7,7 @@ class ProvisionalCell:
     
     def __init__(self, cell):
         self.car = cell.car
+
 
 class Cell:
     id = 0
@@ -25,9 +27,10 @@ class Cell:
     
     def apply_rules(self):
         self.car = self.p.car
-    
+
+
 class StreetCell(Cell):
-    rule_class = rules.StreetRule
+    rule_class = tca_ng.rules.StreetRule
     street = None
     lane = None
     cell = None
@@ -40,9 +43,10 @@ class StreetCell(Cell):
         if dif > 0 and cells[-1].connection is not None:
             cells += cells[-1].get_front_cells(dif, route)
         return cells[:n]
-    
+
+
 class IntersectionCell(Cell):
-    rule_class = rules.IntersectionRule
+    rule_class = tca_ng.rules.IntersectionRule
     routes = None
     intersection = None
     
@@ -54,17 +58,20 @@ class IntersectionCell(Cell):
         if dif > 0 and cells[-1].connection is not None:
             cells += cells[-1].get_front_cells(dif, route)
         return cells[:n]
-    
+
+
 class EndpointCell(Cell):
     rate = 0
     connection = None
-    
+
+
 class EndpointEntranceCell(EndpointCell):
-    endpoint_rule_class = rules.EntranceRule
+    endpoint_rule_class = tca_ng.rules.EntranceRule
     speed = 1
-    
+
+
 class EndpointExitCell(EndpointCell):
-    endpoint_rule_class = rules.ExitRule
+    endpoint_rule_class = tca_ng.rules.ExitRule
     
     def get_front_cells(self, n, route=None):
         if self.connection is None:
@@ -78,15 +85,19 @@ class EndpointExitCell(EndpointCell):
                 return []
         else:
             raise NotImplementedError
-    
+
+
 class StreetEntranceCell(EndpointEntranceCell, StreetCell):
     pass
-    
+
+
 class StreetExitCell(EndpointExitCell, StreetCell):
     pass
 
+
 class IntersectionEntranceCell(EndpointEntranceCell, IntersectionCell):
     pass
+
 
 class IntersectionExitCell(EndpointExitCell, IntersectionCell):
     pass

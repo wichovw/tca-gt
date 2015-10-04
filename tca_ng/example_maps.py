@@ -1,19 +1,20 @@
-import cells
-import models
+import tca_ng.cells
+import tca_ng.models
+
 
 def generate_street(length, rate=0.8):
-    topo = models.Topology()
+    topo = tca_ng.models.Topology()
     
-    entrance = cells.StreetEntranceCell()
+    entrance = tca_ng.cells.StreetEntranceCell()
     topo.cells.append(entrance)
     topo.endpoint_cells.append(entrance)
     for _ in range(length - 2):
-        topo.cells.append(cells.StreetCell())
-    exit = cells.StreetExitCell()
+        topo.cells.append(tca_ng.cells.StreetCell())
+    exit = tca_ng.cells.StreetExitCell()
     topo.cells.append(exit)
     topo.endpoint_cells.append(exit)
     
-    street = models.Street()
+    street = tca_ng.models.Street()
     street.cells.append([])
         
     for i, cell in enumerate(topo.cells):
@@ -25,14 +26,15 @@ def generate_street(length, rate=0.8):
         cell.cell = i
         cell.cells_to_end = length - i
         if i + 1 < len(topo.cells):
-            cells.front_cell = topo.cells[i + 1]
-        if isinstance(cell, cells.EndpointCell):
+            tca_ng.cells.front_cell = topo.cells[i + 1]
+        if isinstance(cell, tca_ng.cells.EndpointCell):
             cell.rate = rate
             
     return topo
 
+
 def simple_intersection(rate=0.8):
-    topo = models.Topology()
+    topo = tca_ng.models.Topology()
     """
            v
          
@@ -41,20 +43,20 @@ def simple_intersection(rate=0.8):
            3
     """
     topo.cells = []
-    topo.cells.append(cells.IntersectionEntranceCell())
-    topo.cells.append(cells.IntersectionEntranceCell())
-    topo.cells.append(cells.IntersectionExitCell())
-    topo.cells.append(cells.IntersectionExitCell())
-    topo.cells.append(cells.IntersectionCell())
+    topo.cells.append(tca_ng.cells.IntersectionEntranceCell())
+    topo.cells.append(tca_ng.cells.IntersectionEntranceCell())
+    topo.cells.append(tca_ng.cells.IntersectionExitCell())
+    topo.cells.append(tca_ng.cells.IntersectionExitCell())
+    topo.cells.append(tca_ng.cells.IntersectionCell())
     
-    int_ = models.Intersection()
+    int_ = tca_ng.models.Intersection()
     
     routes = []
     int_.routes = routes
-    routes.append(models.Route())
-    routes.append(models.Route())
-    routes.append(models.Route())
-    routes.append(models.Route())
+    routes.append(tca_ng.models.Route())
+    routes.append(tca_ng.models.Route())
+    routes.append(tca_ng.models.Route())
+    routes.append(tca_ng.models.Route())
     
     routes[0].cells = [topo.cells[0], topo.cells[4], topo.cells[2]]
     routes[1].cells = [topo.cells[0], topo.cells[4], topo.cells[3]]
@@ -90,15 +92,15 @@ def simple_intersection(rate=0.8):
     topo.cells[4].intersection = int_
     topo.cells[4].routes = [routes[0], routes[1], routes[2], routes[3]]
     
-    semaphore = models.Semaphore()
+    semaphore = tca_ng.models.Semaphore()
     int_.semaphore = semaphore
     topo.semaphores = [semaphore,]
     lights = []
     semaphore.states = lights
     topo.lights = lights
     
-    lights.append(models.Light(20))
-    lights.append(models.Light(20))
+    lights.append(tca_ng.models.Light(20))
+    lights.append(tca_ng.models.Light(20))
     
     lights[0].viewer_address = [0, 2]
     lights[0].routes = [routes[0], routes[1]]
@@ -108,9 +110,10 @@ def simple_intersection(rate=0.8):
     lights[1].routes = [routes[2], routes[3]]
     
     return topo
-        
+
+
 def simple_map(size=5):
-    topo = models.Topology()
+    topo = tca_ng.models.Topology()
     
     streets = []
     streets.append(generate_street(size))
@@ -177,8 +180,9 @@ def simple_map(size=5):
         
     return topo
 
+
 def totito_map(size=5):
-    topo = models.Topology()
+    topo = tca_ng.models.Topology()
     
     crosses = []
     crosses.append(simple_map(size))
@@ -237,7 +241,7 @@ def totito_map(size=5):
     
         
 def simple_2_streets(size=5):
-    topo = models.Topology()
+    topo = tca_ng.models.Topology()
     
     street1 = generate_street(size)
     street2 = generate_street(size)

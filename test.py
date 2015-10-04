@@ -1,5 +1,6 @@
 from service.tca_service import TCAService
 
+
 def run():
     # Object
     service = TCAService()
@@ -14,3 +15,4 @@ def run():
 
 if __name__ == '__main__':
     run()
+
