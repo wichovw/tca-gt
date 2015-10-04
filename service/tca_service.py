@@ -1,8 +1,6 @@
-
-from server.tca_parser import parse
-from server.tca_renderer import GridMapRenderer
-from server.tca.map import TCAMap
-from server.tca.automaton import TCAAutomaton
+from tca_ng.models import Automaton
+from tca_ng.example_maps import totito_map
+import random
 
 
 class TCAService(object):
@@ -24,9 +22,12 @@ class TCAService(object):
         :return:
         """
         # Automaton
-        matrix = parse('totito')
-        tca_map = TCAMap(matrix)
-        self._automaton = TCAAutomaton(tca_map)
+        self._automaton = Automaton()
+        self._automaton.topology = totito_map(10)
+        # matrix = parse('totito')
+        # tca_map = TCAMap(matrix)
+        # self._automaton = TCAAutomaton(tca_map)
+        # return self.automaton.topology.json_view()
 
         # Class attributes
         self.traffic_lights = []
@@ -41,7 +42,7 @@ class TCAService(object):
         # self.render.get_matrix()
 
         # Populate traffic lights list
-        self._build_traffic_lights(tca_map.semaphores)
+        # self._build_traffic_lights(tca_map.semaphores)
 
     def fixed_time_start(self, cycle_count=60):
         """
@@ -60,10 +61,27 @@ class TCAService(object):
             # Simulate and get data from TCA simulator
             for i in range(cycle_count):
                 self._automaton.update()
-                self._get_data()
+                # self._get_data()
+
+                print()
+                print('total cars', len(self._automaton.topology.cars))
+                for car in self._automaton.topology.cars:
+                    if car.id % 10 == 0:
+                        print('car %3s %8s route: %s' % (
+                                car.id,
+                                tuple(car.cell.viewer_address),
+                                car.route
+                        ))
+
+                # modify a light
+                light = random.choice(self._automaton.topology.lights)
+                change = random.randint(-2, 2)
+                print(light, light.time, change)
+                light.time += change
+                print()
 
             # Process obtained data
-            self._process_data()
+            # self._process_data()
 
         except Exception:
             return False
