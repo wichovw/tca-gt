@@ -24,27 +24,21 @@ class TCAService(object):
         # Automaton
         self._automaton = Automaton()
         self._automaton.topology = totito_map(10)
-        # matrix = parse('totito')
-        # tca_map = TCAMap(matrix)
-        # self._automaton = TCAAutomaton(tca_map)
-        # return self.automaton.topology.json_view()
 
         # Class attributes
         self.traffic_lights = []
         self.average_speed = 0
-        self._cumulative_speed = 0
-        self._average_distance = 0
-        self.stopped_time = 0
-        self._car_number = 0
+        self.step_average_speed = []
+        # self._cumulative_speed = 0
+        # self._average_distance = 0
+        # self.stopped_time = 0
+        # self._car_number = 0
         self._cycle_count = 0
 
-        # self.render = GridMapRenderer(map)
-        # self.render.get_matrix()
+        # Build data from map
+        self._build_traffic_lights()
 
-        # Populate traffic lights list
-        # self._build_traffic_lights(tca_map.semaphores)
-
-    def fixed_time_start(self, cycle_count=60):
+    def fixed_time_start(self, cycle_count=60, all_data=False):
         """
         Simulation start using a fixed time strategy
         :param cycle_count: Number of cycles to be simulated
@@ -53,35 +47,33 @@ class TCAService(object):
 
         # Set simulation values
         self._cycle_count = cycle_count
-        # TODO set number of cars into automaton
-        self._car_number = 100
 
         try:
 
             # Simulate and get data from TCA simulator
             for i in range(cycle_count):
                 self._automaton.update()
-                # self._get_data()
+                self._update_data()
 
-                print()
-                print('total cars', len(self._automaton.topology.cars))
-                for car in self._automaton.topology.cars:
-                    if car.id % 10 == 0:
-                        print('car %3s %8s route: %s' % (
-                                car.id,
-                                tuple(car.cell.viewer_address),
-                                car.route
-                        ))
+                # print()
+                # print('total cars', len(self._automaton.topology.cars))
+                # for car in self._automaton.topology.cars:
+                #     if car.id % 10 == 0:
+                #         print('car %3s %8s route: %s' % (
+                #                 car.id,
+                #                 tuple(car.cell.viewer_address),
+                #                 car.route
+                #         ))
 
                 # modify a light
-                light = random.choice(self._automaton.topology.lights)
-                change = random.randint(-2, 2)
-                print(light, light.time, change)
-                light.time += change
-                print()
+                # light = random.choice(self._automaton.topology.lights)
+                # change = random.randint(-2, 2)
+                # print(light, light.time, change)
+                # light.time += change
+                # print()
 
             # Process obtained data
-            # self._process_data()
+            self._process_data()
 
         except Exception:
             return False
@@ -97,9 +89,9 @@ class TCAService(object):
         Get traffic lights in this format:
 
             [
-                {'id_1': 10, 'id_2': 5},
-                {'id_3': 5, 'id_4': 5},
-                {'id_5': 15, 'id_6': 20}
+                {'id': 0, 'time': 20},
+                {'id': 1, 'time': 5},
+                {'id': 2, 'time': 15}
             ]
 
         :return: List containing dictionaries representing traffic lights
@@ -131,23 +123,18 @@ class TCAService(object):
         """
         return self.stopped_time
 
-    def _get_data(self):
+    def _update_data(self):
         """
         Get data from simulator for metrics
         :return:
         """
 
-        # Iterate into map items getting cars data
-        for street_id, street in self._automaton.map.streets.items():
-            for lane in range(street.width):
-                for cell in range(street.height + street.front_offset):
-                    car = self._automaton.map.get((street_id, lane, cell))
-                    if car:
-                        # When we get a car
-                        if car.speed != 0:
-                            self._cumulative_speed += car.speed
-                        else:
-                            self.stopped_time += 1
+        # Update average speed (cumulative speed of all cars / number of cars)
+        cumulative_speed = 0
+        for car in self._automaton.topology.cars:
+            cumulative_speed += car.speed
+
+        self.step_average_speed.append(cumulative_speed / len(self._automaton.topology.cars))
 
     def _process_data(self):
         """
@@ -156,9 +143,9 @@ class TCAService(object):
         """
 
         # Process average speed
-        self.average_speed = self._cumulative_speed/self._car_number/self._cycle_count
+        self.average_speed = sum(self.step_average_speed) / float(len(self.step_average_speed))
 
-    def _build_traffic_lights(self, semaphores):
+    def _build_traffic_lights(self):
         """
         Build list containing dictionaries representing traffic lights
         :param semaphores: Semaphores of simulator map
@@ -169,12 +156,10 @@ class TCAService(object):
         self.traffic_lights = []
 
         # Iterate all semaphores in simulator map
-        for semaphore in semaphores:
-            s = {}
+        for light in self._automaton.topology.lights:
+            l = {}
+            l['id'] = light.id
+            l['time'] = light.time
 
-            # For each light add it to a dictionary {'id': time}
-            for light in semaphore.lights:
-                s[light.id] = light.time
-
-            # Add dictionary to list
-            self.traffic_lights.append(s)
+            # Add dictionary {'id': x, 'time': y} to list
+            self.traffic_lights.append(l)
