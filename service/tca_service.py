@@ -64,8 +64,8 @@ class TCAService(object):
                 #                 tuple(car.cell.viewer_address),
                 #                 car.route
                 #         ))
-
-                # modify a light
+                #
+                # # modify a light
                 # light = random.choice(self._automaton.topology.lights)
                 # change = random.randint(-2, 2)
                 # print(light, light.time, change)
@@ -75,7 +75,8 @@ class TCAService(object):
             # Process obtained data
             self._process_data()
 
-        except Exception:
+        except:
+            print('ERROR: Simulator raised an exception!')
             return False
 
         # Success
@@ -96,6 +97,10 @@ class TCAService(object):
 
         :return: List containing dictionaries representing traffic lights
         """
+        # Re build traffic lights
+        self._build_traffic_lights()
+
+        # Return dictionary containing traffic lights information
         return self.traffic_lights
 
     def set_traffic_lights(self, traffic_light_time):
@@ -113,13 +118,12 @@ class TCAService(object):
         try:
             for time in traffic_light_time:
                 light = self._search_traffic_light(time['id'])
-                # If light exists
-                if not light:
-                    light.time = time[time]
-                else:
-                    raise KeyError
+                light.time = time['time']
 
-        except Exception:
+        except InvalidTrafficLightId as invalid_id:
+            raise invalid_id
+        except:
+            print('ERROR: Incorrect dictionary for setting traffic lights time!')
             return False
 
         # Success
@@ -150,18 +154,18 @@ class TCAService(object):
         """
         return self.stopped_time
 
-    def _search_traffic_light(self, id):
+    def _search_traffic_light(self, light_id):
         """
         Searh for a traffic light into light list
         :param id: id of the traffic light
         :return: light object, None if doesn't exists
         """
         for light in self._automaton.topology.lights:
-            if light.id == id:
+            if light.id == light_id:
                 return light
 
-        # None if id doesn't exists
-        return None
+        # Raise exception if id doesn't exists
+        raise InvalidTrafficLightId(light_id)
 
     def _update_data(self):
         """
@@ -197,9 +201,29 @@ class TCAService(object):
 
         # Iterate all semaphores in simulator map
         for light in self._automaton.topology.lights:
-            l = {}
+            l = dict()
             l['id'] = light.id
             l['time'] = light.time
 
             # Add dictionary {'id': x, 'time': y} to list
             self.traffic_lights.append(l)
+
+
+class InvalidTrafficLightId(Exception):
+    """
+    Custom exception to raise when a traffic light id is not found.
+    """
+    def __init__(self, value):
+        """
+        Exception __init__
+        :param value: Value that is incorrect
+        :return:
+        """
+        self.value = value
+
+    def __str__(self):
+        """
+        Exception string representation
+        :return: Message with error representation
+        """
+        return 'ERROR: The traffic light id ({}) does not exists in simulator!'.format(repr(self.value))
