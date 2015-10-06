@@ -98,6 +98,33 @@ class TCAService(object):
         """
         return self.traffic_lights
 
+    def set_traffic_lights(self, traffic_light_time):
+        """
+        Set traffic lights in this format:
+
+            [
+                {'id': 0, 'time': 20},
+                {'id': 1, 'time': 5},
+                {'id': 2, 'time': 15}
+            ]
+        :param traffic_light_time: Dictionary containing traffic lights time
+        :return: True if traffic lights time changed correctly
+        """
+        try:
+            for time in traffic_light_time:
+                light = self._search_traffic_light(time['id'])
+                # If light exists
+                if not light:
+                    light.time = time[time]
+                else:
+                    raise KeyError
+
+        except Exception:
+            return False
+
+        # Success
+        return True
+
     def get_average_speed(self):
         """
         Get average speed of the simulation
@@ -122,6 +149,19 @@ class TCAService(object):
         :return: Stopped time
         """
         return self.stopped_time
+
+    def _search_traffic_light(self, id):
+        """
+        Searh for a traffic light into light list
+        :param id: id of the traffic light
+        :return: light object, None if doesn't exists
+        """
+        for light in self._automaton.topology.lights:
+            if light.id == id:
+                return light
+
+        # None if id doesn't exists
+        return None
 
     def _update_data(self):
         """
