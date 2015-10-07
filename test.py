@@ -6,19 +6,25 @@ def run():
     service = TCAService()
 
     # Get traffic lights
+    print()
+    print('Traffic lights dictionary:')
     print(service.get_traffic_lights())
+    print()
 
     # Start running
     service.fixed_time_start(10)
 
     # Get average speed
-    print(service.get_average_speed())
+    print('Average speed: {}'.format(service.get_average_speed()))
 
     # Get average cars number
-    print(service.get_average_cars_number())
+    print('Average cars number: {}'.format(service.get_average_cars_number()))
 
     # Get stopped time
-    print(service.get_stopped_time())
+    print('Total stopped time: {}'.format(service.get_stopped_time()))
+
+    # Get average stopped time
+    print('Total stopped time: {}'.format(service.get_average_stopped_time()))
 
     # Set traffic lights
     time = []
@@ -33,7 +39,10 @@ def run():
     service.set_traffic_lights(time)
 
     # Get traffic lights
+    print()
+    print('Traffic lights dictionary:')
     print(service.get_traffic_lights())
+    print()
 
 if __name__ == '__main__':
     run()

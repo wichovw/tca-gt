@@ -29,8 +29,11 @@ class TCAService(object):
         self.traffic_lights = []
         self.average_speed = None
         self.step_average_speed = []
-        # self._average_distance = 0
+        # self.average_distance = 0
         self.stopped_time = 0
+        self.step_stopped_time = []
+        self.average_stopped_time = 0
+        # self.stopped_time_per_car
         self.average_cars_number = None
         self.step_car_number = []
         self._cycle_count = 0
@@ -58,6 +61,10 @@ class TCAService(object):
             # Process obtained data
             self._process_data()
 
+            # Print obtained data to file
+            if all_data:
+                self._print_data()
+
         except:
             print('ERROR: Simulator raised an exception!')
             return False
@@ -66,6 +73,12 @@ class TCAService(object):
         return True
 
     def dynamic_time_start(self):
+        raise NotImplementedError
+
+    def random_fixed_time_start(self, cycle_count=60, min_time=5, max_time=20, all_data=False):
+        raise NotImplementedError
+
+    def random_dynamic_time_start(self, cycle_count=60, variation_time=5, all_data=False):
         raise NotImplementedError
 
     def get_traffic_lights(self):
@@ -134,6 +147,17 @@ class TCAService(object):
 
         return self.average_cars_number
 
+    def get_average_stopped_time(self):
+        """
+        Get average stopped time
+
+        Formula:
+            (stopped_time_iteration_1 + stopped_time_iteration_2 + stopped_time_iteration_number_of_cycles) / number_of_cycles
+        :return: Average stopped time, None if not available
+        """
+
+        return self.average_stopped_time
+
     def get_average_distance(self):
         raise NotImplementedError
 
@@ -167,15 +191,22 @@ class TCAService(object):
         :return:
         """
 
+        # Stopped time counter
+        cycle_stopped_time = 0
+
         # Update average speed (cumulative speed of all cars / number of cars)
         # Update stopped time, increment 1 when speed equals 0
         cumulative_speed = 0
         for car in self._automaton.topology.cars:
             if car.speed == 0:
                 self.stopped_time += 1
+                cycle_stopped_time += 1
             cumulative_speed += car.speed
 
         self.step_average_speed.append(cumulative_speed / len(self._automaton.topology.cars))
+
+        # Update stopped time
+        self.step_stopped_time.append(cycle_stopped_time)
 
         # Update cars number
         self.step_car_number.append(len(self._automaton.topology.cars))
@@ -191,6 +222,12 @@ class TCAService(object):
 
         # Process average cars number
         self.average_cars_number = int(round(sum(self.step_car_number) / float(len(self.step_car_number)), 0))
+
+        # Process average stopped time per simulation
+        self.average_stopped_time = sum(self.step_stopped_time) / float(len(self.step_stopped_time))
+
+    def _print_data(self):
+        raise NotImplementedError
 
     def _build_traffic_lights(self):
         """
