@@ -27,12 +27,13 @@ class TCAService(object):
 
         # Class attributes
         self.traffic_lights = []
-        self.average_speed = 0
+        self.average_speed = None
         self.step_average_speed = []
         # self._cumulative_speed = 0
         # self._average_distance = 0
         # self.stopped_time = 0
-        # self._average_car_number = 0
+        self.average_cars_number = None
+        self.step_car_number = []
         self._cycle_count = 0
 
         # Build data from map
@@ -136,9 +137,20 @@ class TCAService(object):
         Formula:
             (car_1_speed_1 + car_2_speed_1 + car_1_speed_2 + car_2_speed_2) / number_of_cars / number_of_cycles
 
-        :return: Average speed
+        :return: Average speed, None if not available
         """
         return self.average_speed
+
+    def get_average_cars_number(self):
+        """
+        Get average cars number
+
+        Formula:
+            (cars_number_iteration_1 + cars_number_iteration_2 + cars_number_iteration_number_of_cycles) / number_of_cycles
+        :return: Average cars number, None if not available
+        """
+
+        return self.average_cars_number
 
     def get_average_distance(self):
         raise NotImplementedError
@@ -180,6 +192,9 @@ class TCAService(object):
 
         self.step_average_speed.append(cumulative_speed / len(self._automaton.topology.cars))
 
+        # Update cars number
+        self.step_car_number.append(len(self._automaton.topology.cars))
+
     def _process_data(self):
         """
         Process final data
@@ -188,6 +203,9 @@ class TCAService(object):
 
         # Process average speed
         self.average_speed = sum(self.step_average_speed) / float(len(self.step_average_speed))
+
+        # Process average cars number
+        self.average_cars_number = round(sum(self.step_car_number) / float(len(self.step_car_number)), 0)
 
     def _build_traffic_lights(self):
         """
