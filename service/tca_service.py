@@ -205,7 +205,7 @@ class TCAService(object):
         self.average_speed = sum(self.step_average_speed) / float(len(self.step_average_speed))
 
         # Process average cars number
-        self.average_cars_number = round(sum(self.step_car_number) / float(len(self.step_car_number)), 0)
+        self.average_cars_number = int(round(sum(self.step_car_number) / float(len(self.step_car_number)), 0))
 
     def _build_traffic_lights(self):
         """
