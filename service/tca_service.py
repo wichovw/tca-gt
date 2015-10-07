@@ -55,23 +55,6 @@ class TCAService(object):
                 self._automaton.update()
                 self._update_data()
 
-                # print()
-                # print('total cars', len(self._automaton.topology.cars))
-                # for car in self._automaton.topology.cars:
-                #     if car.id % 10 == 0:
-                #         print('car %3s %8s route: %s' % (
-                #                 car.id,
-                #                 tuple(car.cell.viewer_address),
-                #                 car.route
-                #         ))
-                #
-                # # modify a light
-                # light = random.choice(self._automaton.topology.lights)
-                # change = random.randint(-2, 2)
-                # print(light, light.time, change)
-                # light.time += change
-                # print()
-
             # Process obtained data
             self._process_data()
 
@@ -90,9 +73,9 @@ class TCAService(object):
         Get traffic lights in this format:
 
             [
-                {'id': 0, 'time': 20},
-                {'id': 1, 'time': 5},
-                {'id': 2, 'time': 15}
+                {'id': 0, 'schedule': None, 'lights': [0, 1]},
+                {'id': 1, 'schedule': None, 'lights': [2, 3]},
+                {'id': 2, 'schedule': None, 'lights': [4, 5]}
             ]
 
         :return: List containing dictionaries representing traffic lights
