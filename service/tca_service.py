@@ -32,7 +32,7 @@ class TCAService(object):
         # self._cumulative_speed = 0
         # self._average_distance = 0
         # self.stopped_time = 0
-        # self._car_number = 0
+        # self._average_car_number = 0
         self._cycle_count = 0
 
         # Build data from map
@@ -200,13 +200,23 @@ class TCAService(object):
         self.traffic_lights = []
 
         # Iterate all semaphores in simulator map
-        for light in self._automaton.topology.lights:
-            l = dict()
-            l['id'] = light.id
-            l['time'] = light.time
+        for semaphore in self._automaton.topology.semaphores:
 
-            # Add dictionary {'id': x, 'time': y} to list
-            self.traffic_lights.append(l)
+            # Create new dictionary and add semaphore id
+            semaphore_dict = dict()
+            semaphore_dict['id'] = semaphore.id
+
+            # Build lights list and add it to dictionary
+            lights = []
+            for light in semaphore.states:
+                lights.append(light.id)
+            semaphore_dict['lights'] = lights
+
+            # Add semaphore schedule
+            semaphore_dict['schedule'] = None
+
+            # Add semaphore dictionary to traffic lights list
+            self.traffic_lights.append(semaphore_dict)
 
 
 class InvalidTrafficLightId(Exception):
