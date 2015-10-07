@@ -17,6 +17,9 @@ def run():
     # Get average cars number
     print(service.get_average_cars_number())
 
+    # Get stopped time
+    print(service.get_stopped_time())
+
     # Set traffic lights
     time = []
     time_1 = dict()
@@ -31,9 +34,6 @@ def run():
 
     # Get traffic lights
     print(service.get_traffic_lights())
-
-    # Get stopped time
-    # print(service.get_stopped_time())
 
 if __name__ == '__main__':
     run()

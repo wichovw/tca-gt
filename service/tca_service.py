@@ -29,9 +29,8 @@ class TCAService(object):
         self.traffic_lights = []
         self.average_speed = None
         self.step_average_speed = []
-        # self._cumulative_speed = 0
         # self._average_distance = 0
-        # self.stopped_time = 0
+        self.stopped_time = 0
         self.average_cars_number = None
         self.step_car_number = []
         self._cycle_count = 0
@@ -186,8 +185,11 @@ class TCAService(object):
         """
 
         # Update average speed (cumulative speed of all cars / number of cars)
+        # Update stopped time, increment 1 when speed equals 0
         cumulative_speed = 0
         for car in self._automaton.topology.cars:
+            if car.speed == 0:
+                self.stopped_time += 1
             cumulative_speed += car.speed
 
         self.step_average_speed.append(cumulative_speed / len(self._automaton.topology.cars))
@@ -210,7 +212,6 @@ class TCAService(object):
     def _build_traffic_lights(self):
         """
         Build list containing dictionaries representing traffic lights
-        :param semaphores: Semaphores of simulator map
         :return:
         """
 
