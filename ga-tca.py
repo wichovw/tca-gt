@@ -17,9 +17,11 @@ def get_normalized_lights(traffic_lights):
     max_lights = max(len(_['lights']) for _ in traffic_lights)
     #Build a normalized list of IDs for each light
     intersections = {}
+    real_intersections = {}
     for intersection in traffic_lights:
         intersections[intersection['id']] = [l % max_lights for l in intersection['lights']]
-    return intersections
+        real_intersections[intersection['id']] = [l for l in intersection['lights']]
+    return intersections, real_intersections
 
 def build_rand_chromosome(individual, intersections, period, getrand):
     '''
@@ -32,46 +34,62 @@ def build_rand_chromosome(individual, intersections, period, getrand):
             chromosome.append(getrand(lights))
     return individual(chromosome)
 
-def fixed_choice(alist):
-    random.seed = 1992
-    return random.choice(alist)
-
-def evaluate(individual):
-    #Decode individual
-    #Run simulation
+def evaluate(simulator, period, normal_inters, real_inters, individual):
+    '''
+    Receives a simulator instance, an intersection map and an individual
+    Executes simulation and returns fitness values
+    '''
+    #Map normalized ids to real ids and calculate times
+    api_inters = []
     print(individual)
-    return sum(individual),
+    for inter_id, inter_lights in normal_inters.items():
+        api_inter = {"id": inter_id, "lights": real_inters[inter_id]}
+        light_past = -1
+        schedule = {}
+        for t in range(period):
+            light_t = individual.pop(0)
+            if light_t != light_past:
+                schedule[t] = real_inters[inter_id][inter_lights.index(light_t)]
+                light_past = light_t
+        api_inter['schedule'] = schedule
+        api_inters.append(api_inter)
+        print(api_inter)
+    simulator.set_traffic_lights(api_inter)
+    simulator.fixed_time_start(period * 5)
+    
+    return simulator.get_average_speed(), simulator.get_stopped_time()
 
-def fill_toolbox(intersections, period):
+def fill_toolbox(intersections, period, simulator):
     '''
     Returns a DEAP toolbox with required components
     '''
+    normal_inters, real_inters = get_normalized_lights(intersections)
     #Register toolbox components
     toolbox = base.Toolbox()
     #Population building components
-    toolbox.register("attr_light", fixed_choice)
-    toolbox.register("individual", build_rand_chromosome, creator.Individual, intersections, period, toolbox.attr_light)
+    toolbox.register("attr_light", random.choice)
+    print(period)
+    toolbox.register("individual", build_rand_chromosome, creator.Individual, normal_inters, period, toolbox.attr_light)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     #Register operator
     toolbox.register("select", tools.selBest)
     toolbox.register("mate", tools.cxUniform)
     toolbox.register("mutate", tools.mutShuffleIndexes)
-    toolbox.register("evaluate", evaluate)
+    toolbox.register("evaluate", evaluate, simulator, period, normal_inters, real_inters)
     #Register helper
     toolbox.register("clone", copy.copy)
     
     return toolbox
 
-'''
-Recives configurations for the genetic algorithm: period, seed
-Executes algorithm to find a result
-Returns found solution
-'''
-def find_solution(population=5, max_gen=2, period=10, seed=1992):
+def find_solution(population=1, max_gen=1, period=10, seed=1992):
+    '''
+    Recives configurations for the genetic algorithm: period, seed
+    Executes algorithm to find a result
+    Returns found solution
+    '''
     #Get simulator data
     simulator = TCAService()
     intersections = simulator.get_traffic_lights()
-    normal_lights = get_normalized_lights(intersections)
     
     #Register global creator classes
     
@@ -82,12 +100,12 @@ def find_solution(population=5, max_gen=2, period=10, seed=1992):
     
     #Set random seed and fill toolbox
     random.seed = seed
-    toolbox = fill_toolbox(normal_lights, period)
+    toolbox = fill_toolbox(intersections, period, simulator)
     
     #Init population
     population = toolbox.population(n=population)
     
-    #Evaluate the entire population
+    #Evaluate the entire population fitness
     fitnesses = list(map(toolbox.evaluate, population))
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
@@ -128,4 +146,4 @@ def find_solution(population=5, max_gen=2, period=10, seed=1992):
     
 
 if __name__ == '__main__':
-    find_solution(period=1, seed=1992)
+    find_solution()
