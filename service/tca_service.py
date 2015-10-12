@@ -86,9 +86,9 @@ class TCAService(object):
         Get traffic lights in this format:
 
             [
-                {'id': 0, 'schedule': None, 'lights': [0, 1]},
-                {'id': 1, 'schedule': None, 'lights': [2, 3]},
-                {'id': 2, 'schedule': None, 'lights': [4, 5]}
+                {'id': 0, 'schedule': {0: 0, 5: 1}, 'lights': [0, 1]},
+                {'id': 1, 'schedule': {0: 2, 4: 3}, 'lights': [2, 3]},
+                {'id': 2, 'schedule': {2: 4, 6: 5}, 'lights': [4, 5]}
             ]
 
         :return: List containing dictionaries representing traffic lights
@@ -99,27 +99,27 @@ class TCAService(object):
         # Return dictionary containing traffic lights information
         return self.traffic_lights
 
-    def set_traffic_lights(self, traffic_light_time):
+    def set_traffic_lights(self, traffic_light_schedule):
         """
-        Set traffic lights in this format:
+        Set traffic lights schedule:
 
             [
-                {'id': 0, 'time': 20},
-                {'id': 1, 'time': 5},
-                {'id': 2, 'time': 15}
+                {'id': 0, 'schedule': {0: 0, 5: 1},
+                {'id': 1, 'schedule': {0: 2, 4: 3},
+                {'id': 2, 'schedule': {2: 4, 6: 5}
             ]
-        :param traffic_light_time: Dictionary containing traffic lights time
-        :return: True if traffic lights time changed correctly
+        :param traffic_light_schedule: Dictionary containing traffic lights schedule
+        :return: True if traffic lights schedule changed correctly
         """
         try:
-            for time in traffic_light_time:
-                light = self._search_traffic_light(time['id'])
-                light.time = time['time']
+            for schedule in traffic_light_schedule:
+                traffic_light = self._search_traffic_light(schedule['id'])
+                traffic_light.schedule = schedule['schedule']
 
         except InvalidTrafficLightId as invalid_id:
             raise invalid_id
         except:
-            print('ERROR: Incorrect dictionary for setting traffic lights time!')
+            print('ERROR: Incorrect dictionary for setting traffic lights schedule!')
             return False
 
         # Success
@@ -172,18 +172,18 @@ class TCAService(object):
         """
         return self.stopped_time
 
-    def _search_traffic_light(self, light_id):
+    def _search_traffic_light(self, traffic_light_id):
         """
         Searh for a traffic light into light list
         :param id: id of the traffic light
         :return: light object, None if doesn't exists
         """
-        for light in self._automaton.topology.lights:
-            if light.id == light_id:
-                return light
+        for traffic_light in self._automaton.topology.semaphores:
+            if traffic_light.id == traffic_light_id:
+                return traffic_light
 
         # Raise exception if id doesn't exists
-        raise InvalidTrafficLightId(light_id)
+        raise InvalidTrafficLightId(traffic_light_id)
 
     def _update_data(self):
         """
@@ -238,24 +238,24 @@ class TCAService(object):
         # Clean traffic lights list
         self.traffic_lights = []
 
-        # Iterate all semaphores in simulator map
-        for semaphore in self._automaton.topology.semaphores:
+        # Iterate all traffic lights in simulator map
+        for traffic_light in self._automaton.topology.semaphores:
 
-            # Create new dictionary and add semaphore id
-            semaphore_dict = dict()
-            semaphore_dict['id'] = semaphore.id
+            # Create new dictionary and add traffic_light id
+            traffic_light_dict = dict()
+            traffic_light_dict['id'] = traffic_light.id
 
             # Build lights list and add it to dictionary
             lights = []
-            for light in semaphore.states:
+            for light in traffic_light.states:
                 lights.append(light.id)
-            semaphore_dict['lights'] = lights
+            traffic_light_dict['lights'] = lights
 
-            # Add semaphore schedule
-            semaphore_dict['schedule'] = None
+            # Add traffic_light schedule
+            traffic_light_dict['schedule'] = traffic_light.schedule
 
-            # Add semaphore dictionary to traffic lights list
-            self.traffic_lights.append(semaphore_dict)
+            # Add traffic_light dictionary to traffic lights list
+            self.traffic_lights.append(traffic_light_dict)
 
 
 class InvalidTrafficLightId(Exception):
