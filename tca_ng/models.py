@@ -4,6 +4,11 @@ import tca_ng.cells
 
 class Automaton:
     topology = None
+    generation = 0
+    cycle = 40
+    
+    def get_cycle_time(self):
+        return self.generation % self.cycle
     
     def update(self):
         for cell in self.topology.endpoint_cells:
@@ -21,6 +26,8 @@ class Automaton:
             
         for semaphore in self.topology.semaphores:
             semaphore.update()
+            
+        self.generation += 1
 
 
 class Street:
@@ -81,43 +88,61 @@ class Intersection:
 
 class Semaphore:
     id = 0
-    states = []
+    lights = []
     counter = 0
     active = 0
+    schedule = None
+    topology = None
     
     def __init__(self):
         self.id = Semaphore.id
         Semaphore.id += 1
-        self.states = []
+        self.lights = []
+        self.schedule = {}
         
     def __repr__(self):
         return "<Semaphore: %s>" % (self.id)
     
-    def get_active_light(self):
-        return self.states[self.active]
+    def set_schedule(self, schedule):
+        prev = None
+        for period_start in sorted(schedule):
+            light = schedule[period_start]
+            self.schedule[period_start] = {
+                'light': light,
+                'change': 0,
+            }
+            if prev is not None:
+                self.schedule[prev]['change'] = period_start
+            prev = period_start
     
     def update(self):
-        self.counter += 1
-        if self.get_active_light().time < self.counter:
+        time = self.topology.automaton.get_cycle_time()
+        change = self.schedule[self.active]['change']
+        change = change if change != 0 else self.topology.automaton.cycle
+        if time == 0:
             self.get_active_light().free = False
-            self.active = (self.active + 1) % len(self.states)
+            self.active = 0
             self.get_active_light().free = True
-            self.counter = 0
+        elif time >= change:
+            self.get_active_light().free = False
+            self.active = self.schedule[self.active]['change']
+            self.get_active_light().free = True
+    
+    def get_active_light(self):
+        return self.schedule[self.active]['light']
 
 
 class Light:
     id = 0
     routes = []
-    time = 0
     viewer_address = None
-    free = False
     semaphore = None
+    free = False
     
-    def __init__(self, time):
+    def __init__(self):
         self.id = Light.id
         Light.id += 1
         self.routes = []
-        self.time = time
         
     def __repr__(self):
         return "<Light: %s (%s)>" % (self.id, 1 if self.free else 0)
@@ -129,6 +154,7 @@ class Topology:
     lights = []
     semaphores = []
     cars = []
+    automaton = None
     
     def __init__(self):
         self.cells = []
@@ -146,10 +172,14 @@ class Topology:
 
         grid = [[""]*max_x for _ in range(max_y)]
 
+        for light in self.lights:
+            grid[light.viewer_address[1]][light.viewer_address[0]] = 'o' if light.free else 'x'
+        
         for cell in self.cells:
             grid[cell.viewer_address[1]][cell.viewer_address[0]] = '.' if not cell.car else cell.car.speed
             if desc:
                 grid[cell.viewer_address[1]][cell.viewer_address[0]] = cell.id
+                
         return grid
     
     def json_view(self):
