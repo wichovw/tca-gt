@@ -1,19 +1,22 @@
-import tca_ng.example_maps
+from tca_ng import example_maps
 import random
-import cells
-import cars
-import rules
-import models
+from tca_ng import cells
+from tca_ng import cars
+from tca_ng import rules
+from tca_ng import models
 
-if __name__ == "__main__":
+def test():
     tca = models.Automaton()
-    topo = tca_ng.example_maps.totito_map()
+    topo = example_maps.simple_map()
     tca.topology = topo
+    topo.automaton = tca
     
     print(topo.text_view(desc=True))
     
-    for _ in range(1000):
+    for _ in range(100):
+        print(tca.generation, '-', tca.get_cycle_time())
         tca.update()
         print(topo.text_view())
             
     print(topo.text_view(desc=True))
+    

@@ -96,18 +96,23 @@ def simple_intersection(rate=0.8):
     int_.semaphore = semaphore
     topo.semaphores = [semaphore,]
     lights = []
-    semaphore.states = lights
+    semaphore.lights = lights
     topo.lights = lights
     
-    lights.append(tca_ng.models.Light(20))
-    lights.append(tca_ng.models.Light(20))
+    lights.append(tca_ng.models.Light())
+    lights.append(tca_ng.models.Light())
     
     lights[0].viewer_address = [0, 2]
     lights[0].routes = [routes[0], routes[1]]
-    lights[0].free = True
     
     lights[1].viewer_address = [0, 0]
     lights[1].routes = [routes[2], routes[3]]
+    
+    semaphore.topology = topo
+    semaphore.set_schedule({
+            0: lights[0],
+            20: lights[1],
+    })
     
     return topo
 
@@ -177,6 +182,8 @@ def simple_map(size=5):
     
     for cell in topo.cells:
         cell.topology = topo
+    for semaphore in topo.semaphores:
+        semaphore.topology = topo
         
     return topo
 
@@ -236,6 +243,8 @@ def totito_map(size=5):
     
     for cell in topo.cells:
         cell.topology = topo
+    for semaphore in topo.semaphores:
+        semaphore.topology = topo
     
     return topo
     
