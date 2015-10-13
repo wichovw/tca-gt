@@ -24,6 +24,7 @@ class TCAService(object):
         # Automaton
         self._automaton = Automaton()
         self._automaton.topology = totito_map(10)
+        self._automaton.topology.automaton = self._automaton
 
         # Class attributes
         self.traffic_lights = []
@@ -65,8 +66,9 @@ class TCAService(object):
             if all_data:
                 self._print_data()
 
-        except:
-            print('ERROR: Simulator raised an exception!')
+        except Exception as e:
+            print('\nERROR: Simulator raised an exception!')
+            print('Exception message: {} \n'.format(e))
             return False
 
         # Success
@@ -114,12 +116,13 @@ class TCAService(object):
         try:
             for schedule in traffic_light_schedule:
                 traffic_light = self._search_traffic_light(schedule['id'])
-                traffic_light.schedule = schedule['schedule']
+                traffic_light.set_schedule(schedule['schedule'])
 
         except InvalidTrafficLightId as invalid_id:
             raise invalid_id
-        except:
-            print('ERROR: Incorrect dictionary for setting traffic lights schedule!')
+        except Exception as e:
+            print('\nERROR: Incorrect dictionary for setting traffic lights schedule!')
+            print('Exception message: {} \n'.format(e))
             return False
 
         # Success
@@ -251,12 +254,18 @@ class TCAService(object):
                 lights.append(light.id)
             traffic_light_dict['lights'] = lights
 
+            # Build schedule and add it to dictionary
+            schedule = dict()
+            for start, value in traffic_light.schedule.items():
+                schedule[start] = value['light'].id
             # Add traffic_light schedule
-            traffic_light_dict['schedule'] = traffic_light.schedule
+            traffic_light_dict['schedule'] = schedule
 
             # Add traffic_light dictionary to traffic lights list
             self.traffic_lights.append(traffic_light_dict)
 
+
+#schedule': {0: {'change': 20, 'light': <Light: 0 (0)>}, 20: {'change': 0, 'light': <Light: 1 (0)>}}
 
 class InvalidTrafficLightId(Exception):
     """

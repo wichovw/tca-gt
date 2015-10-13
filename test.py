@@ -30,11 +30,17 @@ def run():
     time = []
     time_1 = dict()
     time_1['id'] = 0
-    time_1['time'] = 100
+    sc_1 = dict()
+    sc_1['0'] = 0
+    sc_1['5'] = 1
+    time_1['schedule'] = sc_1
     time.append(time_1)
     time_2 = dict()
     time_2['id'] = 1
-    time_2['time'] = 150
+    sc_2 = dict()
+    sc_2['0'] = 2
+    sc_2['4'] = 3
+    time_2['schedule'] = sc_2
     time.append(time_2)
     service.set_traffic_lights(time)
 
