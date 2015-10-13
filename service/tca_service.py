@@ -247,7 +247,7 @@ class TCAService(object):
 
             # Build lights list and add it to dictionary
             lights = []
-            for light in traffic_light.states:
+            for light in traffic_light.lights:
                 lights.append(light.id)
             traffic_light_dict['lights'] = lights
 
