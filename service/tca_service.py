@@ -116,10 +116,18 @@ class TCAService(object):
         try:
             for schedule in traffic_light_schedule:
                 traffic_light = self._search_traffic_light(schedule['id'])
-                traffic_light.set_schedule(schedule['schedule'])
 
-        except InvalidTrafficLightId as invalid_id:
-            raise invalid_id
+                # Build and set new schedule dictionary to change format
+                new_schedule = dict()
+                for offset, light in schedule['schedule'].items():
+                    new_schedule[offset] = self._search_light(light)
+
+                traffic_light.set_schedule(new_schedule)
+
+        except InvalidTrafficLightId as invalid_traffic_light_id:
+            raise invalid_traffic_light_id
+        except InvalidLightId as invalid_light_id:
+            raise invalid_light_id
         except Exception as e:
             print('\nERROR: Incorrect dictionary for setting traffic lights schedule!')
             print('Exception message: {} \n'.format(e))
@@ -177,9 +185,9 @@ class TCAService(object):
 
     def _search_traffic_light(self, traffic_light_id):
         """
-        Searh for a traffic light into light list
+        Search for a traffic light into semaphore list
         :param id: id of the traffic light
-        :return: light object, None if doesn't exists
+        :return: traffic light object, None if doesn't exists
         """
         for traffic_light in self._automaton.topology.semaphores:
             if traffic_light.id == traffic_light_id:
@@ -187,6 +195,20 @@ class TCAService(object):
 
         # Raise exception if id doesn't exists
         raise InvalidTrafficLightId(traffic_light_id)
+
+    def _search_light(self, light_id):
+        """
+        Search for a light into light list
+        :param light_id: id of the light
+        :return: light object, None if doesn't exists
+        """
+
+        for light in self._automaton.topology.lights:
+            if light.id == light_id:
+                return light
+
+        # Raise exception if id doesn't exists
+        raise InvalidLightId(light_id)
 
     def _update_data(self):
         """
@@ -265,8 +287,6 @@ class TCAService(object):
             self.traffic_lights.append(traffic_light_dict)
 
 
-#schedule': {0: {'change': 20, 'light': <Light: 0 (0)>}, 20: {'change': 0, 'light': <Light: 1 (0)>}}
-
 class InvalidTrafficLightId(Exception):
     """
     Custom exception to raise when a traffic light id is not found.
@@ -285,3 +305,24 @@ class InvalidTrafficLightId(Exception):
         :return: Message with error representation
         """
         return 'ERROR: The traffic light id ({}) does not exists in simulator!'.format(repr(self.value))
+
+
+class InvalidLightId(Exception):
+    """
+    Custom exception to raise when a light id is not found.
+    """
+
+    def __init__(self, value):
+        """
+        Exception __init__
+        :param value: Value that is incorrect
+        :return:
+        """
+        self.value = value
+
+    def __str__(self):
+        """
+        Exception string representation
+        :return: Message with error representation
+        """
+        return 'Error: The light id ({}) does not exists in simulator!'.format(repr(self.value))
