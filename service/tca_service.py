@@ -151,6 +151,15 @@ class TCAService(object):
 
         return self.iteration
 
+    def get_max_speed(self):
+        """
+        Get max speed car speed in simulator
+        :return: max speed
+        """
+
+        # TODO get real value
+        return 3
+
     def get_intersections(self):
         """
         Get intersections in this format:
