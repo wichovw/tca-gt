@@ -24,7 +24,7 @@ def run():
     print('Total stopped time: {}'.format(service.get_stopped_time()))
 
     # Get average stopped time
-    print('Total stopped time: {}'.format(service.get_average_stopped_time()))
+    print('Average stopped time: {}'.format(service.get_average_stopped_time()))
 
     # Set traffic lights
     time = []
@@ -49,6 +49,22 @@ def run():
     print('Traffic lights dictionary:')
     print(service.get_traffic_lights())
     print()
+
+    # Reset statistics
+    print('Reset statistics:')
+    service.reset_statistics()
+
+    # Get average speed
+    print('Average speed: {}'.format(service.get_average_speed()))
+
+    # Get average cars number
+    print('Average cars number: {}'.format(service.get_average_cars_number()))
+
+    # Get stopped time
+    print('Total stopped time: {}'.format(service.get_stopped_time()))
+
+    # Get average stopped time
+    print('Average stopped time: {}'.format(service.get_average_stopped_time()))
 
 if __name__ == '__main__':
     run()

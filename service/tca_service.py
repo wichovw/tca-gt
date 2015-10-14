@@ -85,7 +85,7 @@ class TCAService(object):
 
     def reset_statistics(self):
         """
-        Reset statistics
+        Reset statistics to zero or empty
         :return:
         """
 
