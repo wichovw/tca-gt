@@ -83,6 +83,21 @@ class TCAService(object):
     def random_dynamic_time_start(self, cycle_count=60, variation_time=5, all_data=False):
         raise NotImplementedError
 
+    def reset_statistics(self):
+        """
+        Reset statistics
+        :return:
+        """
+
+        self.average_speed = 0
+        self.step_average_speed = []
+        self.stopped_time = 0
+        self.step_stopped_time = []
+        self.average_stopped_time = 0
+        self.average_cars_number = 0
+        self.step_car_number = []
+        self._cycle_count = 0
+
     def get_traffic_lights(self):
         """
         Get traffic lights in this format:
