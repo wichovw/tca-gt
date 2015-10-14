@@ -98,10 +98,13 @@ def simple_intersection(rate=0.8):
     lights = []
     semaphore.lights = lights
     topo.lights = lights
+
+    # Eddy
+    topo.intersections.append(int_)
     
     lights.append(tca_ng.models.Light())
     lights.append(tca_ng.models.Light())
-    
+
     lights[0].viewer_address = [0, 2]
     lights[0].routes = [routes[0], routes[1]]
     
@@ -179,7 +182,7 @@ def simple_map(size=5):
         
     topo.lights = int_.lights
     topo.semaphores = int_.semaphores
-    
+
     for cell in topo.cells:
         cell.topology = topo
     for semaphore in topo.semaphores:

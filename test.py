@@ -11,7 +11,7 @@ def run():
     print(service.get_traffic_lights())
     print()
 
-    # Start running
+    # Start running fixed time
     service.fixed_time_start(10)
 
     # Get average speed
@@ -65,6 +65,16 @@ def run():
 
     # Get average stopped time
     print('Average stopped time: {}'.format(service.get_average_stopped_time()))
+
+    # Get intersections
+    print()
+    print('Intersections dictionary:')
+    print(service.get_intersections())
+    print()
+
+    # Run dynamic time iteration
+    print(service.dynamic_time_update())
+    print()
 
 if __name__ == '__main__':
     run()

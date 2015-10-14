@@ -38,14 +38,18 @@ class TCAService(object):
         self.average_cars_number = None
         self.step_car_number = []
         self._cycle_count = 0
+        self.intersections = []
+        self.extended_intersections = []
 
         # Build data from map
         self._build_traffic_lights()
+        self._build_intersections()
 
     def fixed_time_start(self, cycle_count=60, all_data=False):
         """
         Simulation start using a fixed time strategy
         :param cycle_count: Number of cycles to be simulated
+        :param all_data: If True print data to file
         :return: True if simulation was successfully completed
         """
 
@@ -74,8 +78,45 @@ class TCAService(object):
         # Success
         return True
 
-    def dynamic_time_start(self):
-        raise NotImplementedError
+    def dynamic_time_update(self, cycle_count=5, all_data=False):
+        """
+        Simulation update using dynamic time strategy
+        :param cycle_count: Number of updates to be simulated
+        :param all_data: If True print data to file
+        :return: List containing map information in this format
+
+            [
+                {'id': 0, 'traffic_light': 0, 'in_streets': [0, 1], 'out_streets': [2, 3]},
+                {'id': 1, 'traffic_light': 1, 'in_streets': [3, 4], 'out_streets': [5, 6]},
+                {'id': 2, 'traffic_light': 2, 'in_streets': [6, 2], 'out_streets': [0, 4]}
+            ]
+
+        """
+
+        # TODO check format for return list
+
+        try:
+
+            # Simulate and get data from TCA simulator
+            for i in range(cycle_count):
+                self._automaton.update()
+                # self._update_data()
+
+            # Process obtained data
+            # self._process_data()
+
+            # Print obtained data to file
+            if all_data:
+                self._print_data()
+
+        except Exception as e:
+            print('\nERROR: Simulator raised an exception!')
+            print('Exception message: {} \n'.format(e))
+            return None
+
+        # Success, build and return data
+        self._build_extended_intersections()
+        return self.extended_intersections
 
     def random_fixed_time_start(self, cycle_count=60, min_time=5, max_time=20, all_data=False):
         raise NotImplementedError
@@ -97,6 +138,24 @@ class TCAService(object):
         self.average_cars_number = 0
         self.step_car_number = []
         self._cycle_count = 0
+
+    def get_intersections(self):
+        """
+        Get intersections in this format:
+
+            [
+                {'id': 0, 'traffic_light': 0, 'in_streets': [0, 1], 'out_streets': [2, 3]},
+                {'id': 1, 'traffic_light': 1, 'in_streets': [3, 4], 'out_streets': [5, 6]},
+                {'id': 2, 'traffic_light': 2, 'in_streets': [6, 2], 'out_streets': [0, 4]}
+            ]
+
+        :return: List containing dictionaries representing intersections
+        """
+
+        return self.intersections
+
+    def get_extended_intersections(self):
+        raise NotImplementedError
 
     def get_traffic_lights(self):
         """
@@ -269,6 +328,51 @@ class TCAService(object):
     def _print_data(self):
         raise NotImplementedError
 
+    def _build_extended_intersections(self):
+        """
+        Build list containing dictionaries representing intersections with metrics information
+        :return:
+        """
+
+        # Clean extended intersection list
+        self.extended_intersections = []
+
+        # TODO Build list
+
+    def _build_intersections(self):
+        """
+        Build list containing dictionaries representing intersections
+        :return:
+        """
+
+        # Clean intersection list
+        self.intersections = []
+
+        # Iterate all intersections in simulator map
+        for intersection in self._automaton.topology.intersections:
+
+            # Create new dictionary and add intersection id
+            intersection_dict = dict()
+            intersection_dict['id'] = intersection.id
+
+            # Add traffic light to intersection dictionary
+            intersection_dict['traffic_light'] = intersection.semaphore.id
+
+            # Build in streets and add it to dictionary
+            in_streets = []
+            for street in intersection.in_streets:
+                in_streets.append(street.id)
+            intersection_dict['in_streets'] = in_streets
+
+            # Build out streets and add it to dictionary
+            out_streets = []
+            for street in intersection.out_streets:
+                out_streets.append(street.id)
+            intersection_dict['out_streets'] = out_streets
+
+            # Add intersection to intersection list
+            self.intersections.append(intersection_dict)
+
     def _build_traffic_lights(self):
         """
         Build list containing dictionaries representing traffic lights
@@ -341,3 +445,4 @@ class InvalidLightId(Exception):
         :return: Message with error representation
         """
         return 'Error: The light id ({}) does not exists in simulator!'.format(repr(self.value))
+

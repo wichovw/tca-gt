@@ -68,6 +68,11 @@ class Intersection:
     id = 0
     cells = []
     routes = []
+
+    # Eddy
+    in_streets = []
+    out_streets = []
+
     semaphore = None
     
     def __init__(self):
@@ -159,6 +164,10 @@ class Topology:
     endpoint_cells = []
     lights = []
     semaphores = []
+
+    # Eddy
+    intersections = []
+
     cars = []
     automaton = None
     
