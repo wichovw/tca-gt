@@ -69,17 +69,20 @@ class Intersection:
     cells = []
     routes = []
 
-    # Eddy
     in_streets = []
     out_streets = []
 
     semaphore = None
-    
+
     def __init__(self):
         self.id = Intersection.id
         Intersection.id += 1
         self.cells = []
         self.routes = []
+
+        # Eddy
+        self.in_streets = []
+        self.out_streets = []
         
     def __repr__(self):
         return "<Intersection: %s>" % (self.id)
@@ -167,6 +170,7 @@ class Topology:
 
     # Eddy
     intersections = []
+    streets = []
 
     cars = []
     automaton = None

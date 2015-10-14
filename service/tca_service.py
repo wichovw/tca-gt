@@ -379,6 +379,10 @@ class TCAService(object):
             # Add traffic light to intersection dictionary
             intersection_dict['traffic_light'] = intersection.semaphore.id
 
+            #Test
+            print('TEST')
+            print(intersection.in_streets)
+
             # Build in streets and add it to dictionary
             in_streets = []
             for street in intersection.in_streets:

@@ -16,7 +16,7 @@ def generate_street(length, rate=0.8):
     
     street = tca_ng.models.Street()
     street.cells.append([])
-        
+
     for i, cell in enumerate(topo.cells):
         street.cells[0].append(cell)
         cell.topology = topo
@@ -29,6 +29,9 @@ def generate_street(length, rate=0.8):
             tca_ng.cells.front_cell = topo.cells[i + 1]
         if isinstance(cell, tca_ng.cells.EndpointCell):
             cell.rate = rate
+
+    # Eddy
+    topo.streets.append(street)
             
     return topo
 
@@ -169,6 +172,13 @@ def simple_map(size=5):
     int_o = int_.cells[0].intersection
     streets[0].cells[0].street.exit_routes.extend([int_o.routes[0], int_o.routes[1]])
     streets[1].cells[0].street.exit_routes.extend([int_o.routes[2], int_o.routes[3]])
+
+    # Eddy
+    int_o.in_streets.append(streets[0].cells[0].street)
+    int_o.in_streets.append(streets[1].cells[0].street)
+    int_o.out_streets.append(streets[2].cells[0].street)
+    int_o.out_streets.append(streets[3].cells[0].street)
+
         
     for street in streets:
         topo.cells += street.cells
