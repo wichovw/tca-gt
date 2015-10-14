@@ -114,6 +114,12 @@ class Semaphore:
             if prev is not None:
                 self.schedule[prev]['change'] = period_start
             prev = period_start
+            
+    def get_schedule(self):
+        schedule = dict()
+        for k, v in self.schedule.items():
+            schedule[k] = v['light']
+        return schedule
     
     def update(self):
         time = self.topology.automaton.get_cycle_time()
