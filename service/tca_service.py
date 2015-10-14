@@ -40,6 +40,7 @@ class TCAService(object):
         self._cycle_count = 0
         self.intersections = []
         self.extended_intersections = []
+        self.iteration = 0
 
         # Build data from map
         self._build_traffic_lights()
@@ -61,6 +62,7 @@ class TCAService(object):
             # Simulate and get data from TCA simulator
             for i in range(cycle_count):
                 self._automaton.update()
+                self.iteration += 1
                 self._update_data()
 
             # Process obtained data
@@ -100,6 +102,7 @@ class TCAService(object):
             # Simulate and get data from TCA simulator
             for i in range(cycle_count):
                 self._automaton.update()
+                self.iteration += 1
                 # self._update_data()
 
             # Process obtained data
@@ -138,6 +141,15 @@ class TCAService(object):
         self.average_cars_number = 0
         self.step_car_number = []
         self._cycle_count = 0
+        self.iteration = 0
+
+    def get_actual_iteration(self):
+        """
+        Get actual iteration number
+        :return: iteration number
+        """
+
+        return self.iteration
 
     def get_intersections(self):
         """
