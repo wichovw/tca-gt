@@ -4,3 +4,5 @@ env/
 *.pyc
 .idea
 tca.log
+ng_env/
+viewer_ng/res/

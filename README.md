@@ -1,6 +1,12 @@
 # TCA.gt
 Traffic Cellular Automata for Guatemala City
 
+## New Generation
+1. Crear ng\_env haciendo virtualenv con requirements\_ng.txt
+	1. Puede que no funcione instalar pygame, (a mi no me funcionó sólo con pip install) hacer referencia a [esta respuesta de Stack Overflow](http://stackoverflow.com/a/28127864).
+2. Activar ng\_env.
+2. Correr tca\_server.py que se encuentra en el folder root para correr el simulador.
+
 ## Install and use
 1. Create a virtual environment and activate it. [More info here](http://www.dabapps.com/blog/introduction-to-pip-and-virtualenv-python/).
 
