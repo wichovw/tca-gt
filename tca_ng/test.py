@@ -7,7 +7,7 @@ from tca_ng import models
 
 def test():
     tca = models.Automaton()
-    topo = example_maps.totito_2lane_map()
+    topo = example_maps.grid_2lane_map()
     tca.topology = topo
     topo.automaton = tca
     
