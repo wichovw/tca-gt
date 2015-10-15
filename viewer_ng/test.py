@@ -53,7 +53,8 @@ class Board:
     def map_cells(self):
         max_x = 0
         max_y = 0
-        for aut_cell in self.automaton.topology.cells:
+        
+        def map_(aut_cell, max_x, max_y):
             max_x = max(max_x, aut_cell.viewer_address[0] + 1)
             max_y = max(max_y, aut_cell.viewer_address[1] + 1)
             cell = Cell()
@@ -61,6 +62,12 @@ class Board:
             cell.location = aut_cell.viewer_address
             cell.color = get_color(aut_cell)
             self.cells.append(cell)
+            return max_x, max_y
+            
+        for aut_cell in self.automaton.topology.cells:
+            max_x, max_y = map_(aut_cell, max_x, max_y)
+        for light in self.automaton.topology.lights:
+            max_x, max_y = map_(light, max_x, max_y)
         self.size = (max_x, max_y)
         
     def update(self):
@@ -79,7 +86,7 @@ def test():
     pygame.init()
     
     tca = models.Automaton()
-    topo = example_maps.totito_map(10)
+    topo = example_maps.totito_map(5)
     tca.topology = topo
     topo.automaton = tca
     board = Board(tca)
