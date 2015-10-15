@@ -19,6 +19,6 @@ config={
 
 #cherrypy.server.socket_host = '172.20.11.29'
 cherrypy.config.update({'server.socket_host': 'localhost',
-                        'server.socket_port': 7890,
+                        'server.socket_port': 7891,
                        })
 cherrypy.quickstart(Root(),'/',config)
