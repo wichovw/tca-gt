@@ -19,6 +19,14 @@ class Automaton:
             cell.rule = cell.rule_class(cell)
 
         for cell in self.topology.cells:
+            cell.rule.pre_setting()
+        for cell in self.topology.cells:
+            cell.rule.apply_()
+            
+        for cell in self.topology.cells:
+            cell.rule = cell.rule_class(cell)
+
+        for cell in self.topology.cells:
             cell.rule.calculate()
 
         for cell in self.topology.cells:
@@ -34,6 +42,8 @@ class Street:
     id = 0
     cells = []
     exit_routes = []
+    length = None
+    lanes = None
     
     def __init__(self):
         self.id = Street.id
@@ -54,6 +64,7 @@ class Street:
 class Route:
     id = 0
     cells = []
+    entrance_lane = None
     
     def __init__(self):
         self.id = Route.id

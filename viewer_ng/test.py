@@ -86,7 +86,8 @@ def test():
     pygame.init()
     
     tca = models.Automaton()
-    topo = example_maps.totito_map(5)
+#    topo = example_maps.generate_wide_street(60, 4)
+    topo = example_maps.simple_2lane_map()
     tca.topology = topo
     topo.automaton = tca
     board = Board(tca)
@@ -117,6 +118,12 @@ def test():
     board.draw(screen, tiles)
     pygame.display.flip()
     
+    def update():
+        tca.update()
+        board.update()
+        board.draw(screen, tiles)
+        
+    
     while done == False:
         
         elapsed += clock.tick(60)
@@ -127,12 +134,16 @@ def test():
             if event.type == locals.KEYDOWN:
                 if event.key == locals.K_SPACE:
                     run = not run
+            if event.type == locals.KEYUP:
+                if event.key == locals.K_q:
+                    done = True
+                elif event.key == locals.K_n:
+                    run = False
+                    update()
         
         if run and elapsed >= 1000 / speed:
             elapsed = 0
-            tca.update()
-            board.update()
-            board.draw(screen, tiles)
+            update()
             
         pygame.display.flip()
     

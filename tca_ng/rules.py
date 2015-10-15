@@ -26,6 +26,9 @@ class Rule:
                 break
             self.front_gap += 1
         
+    def pre_setting(self):
+        pass
+        
     def calculate(self):
         if self.car is None:
             return
@@ -57,7 +60,50 @@ class Rule:
 
 
 class StreetRule(Rule):
-    pass
+    
+    def pre_setting(self):
+        super().pre_setting()
+        self.calculate_changing_lane_rates()
+        self.change_lane_rules()
+        
+    def calculate_changing_lane_rates(self):
+        if self.car is None:
+            return
+        base = self.car.base_lane_changing_rate
+        if self.car.route is None:
+            self.car.right_change_rate = 0.5
+            self.car.lane_changing_rate = base
+            return
+            
+        dif = self.cell.lane - self.car.route.entrance_lane
+        if dif != 0:
+            if self.cell.cells_to_end <= 1:
+                self.car.waits_for_lane_change += 1
+                if self.car.waits_for_lane_change >= self.car.changing_route_max_wait:
+                    self.car.route = random.choice(self.cell.connection.routes)
+                    self.car.waits_for_lane_change = 0
+                    print('deadlock avoidance')
+                
+            self.car.right_change_rate = 1 if dif < 0 else 0
+            self.car.lane_changing_rate = (self.cell.cell / self.cell.street.length) * (1 - base) + base
+        else:
+            self.car.right_change_rate = 0.5
+            self.car.lane_changing_rate = (self.cell.cells_to_end / self.cell.street.length) * base
+            self.car.waits_for_lane_change = 0
+        
+        
+    def change_lane_rules(self):
+        if self.car is None or random.random() > self.car.lane_changing_rate:
+            return
+        side = 'right' if random.random() < self.car.right_change_rate else 'left'
+        dest_cell = getattr(self.cell, '%s_cell' % side)
+        if dest_cell is not None and dest_cell.car is None:
+            if not dest_cell.p.recipient:
+                self.car.p.cell = dest_cell
+                dest_cell.p.car = self.car
+                dest_cell.p.recipient = True
+                if not self.cell.p.recipient:
+                    self.cell.p.car = None
 
 
 class IntersectionRule(Rule):

@@ -36,6 +36,8 @@ class StreetCell(Cell):
     cell = None
     cells_to_end = None
     front_cell = None
+    right_cell = None
+    left_cell = None
     
     def get_front_cells(self, n, route=None):
         cells = self.street.cells[self.lane][self.cell + 1 :]
@@ -52,7 +54,8 @@ class IntersectionCell(Cell):
     
     def get_front_cells(self, n, route=None):
         if route is None:
-            route = self.intersection.get_valid_route(self)
+            return []
+#            route = self.intersection.get_valid_route(self)
         cells = route.cells[route.cells.index(self) + 1 :]
         dif = n - len(cells)
         if dif > 0 and cells[-1].connection is not None:
@@ -79,7 +82,8 @@ class EndpointExitCell(EndpointCell):
         elif isinstance(self.connection, StreetCell):
             return [self.connection] + self.connection.get_front_cells(n - 1, route)
         elif isinstance(self.connection, IntersectionCell):
-            if route in self.connection.intersection.semaphore.get_active_light().routes:
+            if (route in self.connection.intersection.semaphore.get_active_light().routes
+                and route in self.connection.routes):
                 return [self.connection] + self.connection.get_front_cells(n - 1, route)
             else:
                 return []

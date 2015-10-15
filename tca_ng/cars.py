@@ -19,6 +19,17 @@ class Car:
     p = None
     
     decelerate_rate = 0.3
+    # Que tan agresivo es el carro para cambiar de carriles
+    base_lane_changing_rate = 0.2
+    # Que tan agresivo es en este momento el carro para cambiar de carril
+    lane_changing_rate = 0.2
+    # Que tan probable es que cambie a la derecha. Complemento a la izquierda
+    right_change_rate = 0.5
+    # Cuantas iteraciones esperaría al final de una calle para cambiar de carril
+    # antes de cambiar de ruta
+    changing_route_max_wait = 10
+    # Cuantas iteraciones lleva esperando al final de una calle tratando de cambiar de carril
+    waits_for_lane_change = 0
     
     def __init__(self):
         self.id = Car.id
