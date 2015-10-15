@@ -10,7 +10,7 @@ class TCAServer(object):
     @cherrypy.tools.json_out()
     def start(self):
         self.automaton = tca_ng.models.Automaton()
-        self.automaton.topology = tca_ng.example_maps.totito_map(10)
+        self.automaton.topology = tca_ng.example_maps.simple_map(10)
         return self.automaton.topology.json_view()
     
     @cherrypy.expose
