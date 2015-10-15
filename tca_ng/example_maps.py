@@ -178,7 +178,6 @@ def simple_map(size=5):
     int_o.in_streets.append(streets[1].cells[0].street)
     int_o.out_streets.append(streets[2].cells[0].street)
     int_o.out_streets.append(streets[3].cells[0].street)
-
         
     for street in streets:
         topo.cells += street.cells
@@ -227,6 +226,15 @@ def totito_map(size=5):
     crosses[2].cells[3 * size - 1].connection = crosses[3].cells[size]
     crosses[0].cells[4 * size - 1].connection = crosses[3].cells[0]
     crosses[2].cells[4 * size - 1].connection = crosses[1].cells[0]
+
+    crosses[0].cells[40].intersection.neighbors.append(crosses[1].cells[40].intersection)
+    crosses[2].cells[40].intersection.neighbors.append(crosses[3].cells[40].intersection)
+    crosses[0].cells[40].intersection.neighbors.append(crosses[3].cells[40].intersection)
+    crosses[2].cells[40].intersection.neighbors.append(crosses[1].cells[40].intersection)
+    crosses[1].cells[40].intersection.neighbors.append(crosses[0].cells[40].intersection)
+    crosses[3].cells[40].intersection.neighbors.append(crosses[2].cells[40].intersection)
+    crosses[3].cells[40].intersection.neighbors.append(crosses[0].cells[40].intersection)
+    crosses[1].cells[40].intersection.neighbors.append(crosses[2].cells[40].intersection)
     
     crosses[0].cells[3 * size - 1].front_cell = crosses[1].cells[size]
     crosses[2].cells[3 * size - 1].front_cell = crosses[3].cells[size]

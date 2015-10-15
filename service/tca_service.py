@@ -101,10 +101,10 @@ class TCAService(object):
             for i in range(cycle_count):
                 self._automaton.update()
                 self.iteration += 1
-                # self._update_data()
+                self._update_data()
 
             # Process obtained data
-            # self._process_data()
+            self._process_data()
 
             # Print obtained data to file
             if all_data:
@@ -414,6 +414,12 @@ class TCAService(object):
             for street in intersection.out_streets:
                 out_streets.append(street.id)
             intersection_dict['out_streets'] = out_streets
+
+            # Build neighbors
+            neighbors = []
+            for neighbor in intersection.neighbors:
+                neighbors.append(neighbor.id)
+            intersection_dict['neighbors'] = neighbors
 
             # Add intersection to intersection list
             self.intersections.append(intersection_dict)
