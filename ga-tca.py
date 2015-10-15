@@ -80,7 +80,7 @@ def fill_toolbox(intersections, period, simulator):
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     #Register operator
     toolbox.register("selectBest", tools.selBest)
-    toolbox.register("selectRest", tools.selTournament)
+    toolbox.register("selectRest", tools.selRoulette)
     toolbox.register("mate", tools.cxUniform)
     toolbox.register("mutate", tools.mutShuffleIndexes)
     toolbox.register("decode", decode_chromosome, period, normal_inters, real_inters)
@@ -103,7 +103,7 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
     #Register global creator classes
     
     #Fitrness function should maximize average speed and minimize total stopped time
-    creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0,))
+    creator.create("FitnessMin", base.Fitness, weights=(1.0, -0.5))
     #Individual basic definition
     creator.create("Individual", list, fitness=creator.FitnessMin)
     
@@ -119,22 +119,22 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
     #Operator probability
-    CXPB, MUTPB = 0.5, 0.01
+    CXPB, MUTPB = 0.5, 0.2
     
     #Iterate generations
     g = 0
     
     fitness_records = []
     while g < max_gen:
-        print("g:"+str(g))
+        print("g: %s population: %s" % (g, len(population)))
         # Select the next generation individuals
-        best_num = int(len(population) * 0.20)
+        best_num = int(len(population) * 0.10)
         offspring = toolbox.selectBest(population, best_num)
         # Clone the selected individuals
         offspring = list(map(toolbox.clone, offspring))
         offspring = [toolbox.clone(child) for child in offspring]
         # Select the next generation individuals
-        offspring2 = toolbox.selectRest(population, (len(population)), 2)
+        offspring2 = toolbox.selectRest(population, (len(population) - best_num))
         # Clone the selected individuals
         offspring2 = list(map(toolbox.clone, offspring2))
         
@@ -157,15 +157,19 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
+        offspring.extend(offspring2)
+        
+        all_fitness = [ind.fitness.values for ind in offspring]
+        
         #Calculate fitness statistics
-        avg_fitness_speed = sum(f[0] for f in fitnesses) / len(fitnesses)
-        max_fitness_speed = max(fitnesses, key=itemgetter(0))[0]
-        avg_fitness_stop = sum(f[1] for f in fitnesses) / len(fitnesses)
-        max_fitness_stop = min(fitnesses, key=itemgetter(1))[1]
+        avg_fitness_speed = sum(f[0] for f in all_fitness) / len(all_fitness)
+        max_fitness_speed = max(all_fitness, key=itemgetter(0))[0]
+        avg_fitness_stop = sum(f[1] for f in all_fitness) / len(all_fitness)
+        max_fitness_stop = min(all_fitness, key=itemgetter(1))[1]
         
         fitness_records.append((avg_fitness_speed, max_fitness_speed, avg_fitness_stop, max_fitness_stop))
         
-        offspring.extend(offspring2)
+        
         # The population is entirely replaced by the offspring
         population[:]= offspring
         g += 1
@@ -173,13 +177,18 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
     best = toolbox.selectBest(population, 1)[0]
     print(toolbox.decode(best))
     print(best.fitness.values)
-    print(fitness_records)
-    f = open('fitness.csv', 'w')
+    f = open(('fit-%s-%s-%s.csv' % (len(population), max_gen, period)), 'w')
     for record in fitness_records:
         f.write(str(record)[1:-1] + "\n")
     f.close()
 
 if __name__ == '__main__':
+    #Test population variation
+    gen = 100
+    for t in range(1, 21):
+        print("TEST: population = %s, max_gen = %s" % ((t * 10), gen))
+        import cProfile
+        cProfile.run('find_solution(population=%s, max_gen=%s, period=10)' % ((t * 10), gen))
+    #Find Eddy's result
     import cProfile
-    cProfile.run('find_solution(population=200, max_gen=200, period=30)')
-    
+    cProfile.run('find_solution(population=%s, max_gen=%s, period=%s)' % (200, 100, 30))
