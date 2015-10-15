@@ -39,7 +39,7 @@ class TCAService(object):
         self.step_car_number = []
         self._cycle_count = 0
         self.intersections = []
-        self.extended_intersections = []
+        self.streets = []
         self.iteration = 0
 
         # Build data from map
@@ -85,17 +85,15 @@ class TCAService(object):
         Simulation update using dynamic time strategy
         :param cycle_count: Number of updates to be simulated
         :param all_data: If True print data to file
-        :return: List containing map information in this format
+        :return: List containing streets information in this format
 
             [
-                {'id': 0, 'traffic_light': 0, 'in_streets': [0, 1], 'out_streets': [2, 3]},
-                {'id': 1, 'traffic_light': 1, 'in_streets': [3, 4], 'out_streets': [5, 6]},
-                {'id': 2, 'traffic_light': 2, 'in_streets': [6, 2], 'out_streets': [0, 4]}
+                {'id': 0, 'cars_number': 9, 'average_speed': 2.5},
+                {'id': 1, 'cars_number': 11, 'average_speed': 3.1},
+                {'id': 2, 'cars_number': 9, 'average_speed': 2.3}
             ]
 
         """
-
-        # TODO check format for return list
 
         try:
 
@@ -103,10 +101,10 @@ class TCAService(object):
             for i in range(cycle_count):
                 self._automaton.update()
                 self.iteration += 1
-                # self._update_data()
+                self._update_data()
 
             # Process obtained data
-            # self._process_data()
+            self._process_data()
 
             # Print obtained data to file
             if all_data:
@@ -118,8 +116,8 @@ class TCAService(object):
             return None
 
         # Success, build and return data
-        self._build_extended_intersections()
-        return self.extended_intersections
+        self._build_streets()
+        return self.streets
 
     def random_fixed_time_start(self, cycle_count=60, min_time=5, max_time=20, all_data=False):
         raise NotImplementedError
@@ -349,16 +347,42 @@ class TCAService(object):
     def _print_data(self):
         raise NotImplementedError
 
-    def _build_extended_intersections(self):
+    def _build_streets(self):
         """
-        Build list containing dictionaries representing intersections with metrics information
+        Build list containing dictionaries representing streets with metrics information
         :return:
         """
 
-        # Clean extended intersection list
-        self.extended_intersections = []
+        # Clean streets list
+        self.streets = []
 
-        # TODO Build list
+        for street in self._automaton.topology.streets:
+
+            # Create new dictionary and add street id
+            street_dict = dict()
+            street_dict['id'] = street.id
+
+            # Data values
+            cars_number = 0
+            total_speed = 0
+
+            # Iterate cells in streets and get data
+            for lane in street.cells:
+                for cell in lane:
+                    if cell.car is not None:
+                        cars_number += 1
+                        total_speed += cell.car.speed
+
+            # Add data to dictionary
+            if cars_number > 0:
+                street_dict['cars_number'] = cars_number
+                street_dict['average_speed'] = round(total_speed/cars_number, 2)
+            else:
+                street_dict['cars_number'] = 0
+                street_dict['average_speed'] = 0
+
+            # Add intersection to intersection list
+            self.streets.append(street_dict)
 
     def _build_intersections(self):
         """
@@ -390,6 +414,12 @@ class TCAService(object):
             for street in intersection.out_streets:
                 out_streets.append(street.id)
             intersection_dict['out_streets'] = out_streets
+
+            # Build neighbors
+            neighbors = []
+            for neighbor in intersection.neighbors:
+                neighbors.append(neighbor.id)
+            intersection_dict['neighbors'] = neighbors
 
             # Add intersection to intersection list
             self.intersections.append(intersection_dict)

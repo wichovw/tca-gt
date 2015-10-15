@@ -73,6 +73,7 @@ def run():
     print()
 
     # Run dynamic time iteration
+    print('Dinamic update result:')
     print(service.dynamic_time_update())
     print()
 

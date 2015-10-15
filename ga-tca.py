@@ -6,7 +6,7 @@ from deap import creator
 from deap import tools
 
 from service.tca_service import TCAService
-
+from operator import itemgetter
 
 def get_normalized_lights(traffic_lights):
     '''
@@ -34,27 +34,35 @@ def build_rand_chromosome(individual, intersections, period, getrand):
             chromosome.append(getrand(lights))
     return individual(chromosome)
 
+def decode_chromosome(period, normal_inters, real_inters, individual):
+    '''
+    Receives a period, the normalized intersections, the real intersections, and an individual
+    Returns a list of intersection descriptions according to the API
+    '''
+    api_inters = []
+    for inter_id, inter_lights in normal_inters.items():
+        api_inter = {"id": inter_id, "lights": real_inters[inter_id]}
+        light_past = -1
+        schedule = {}
+        for t in range(period):
+            light_t = individual[t]
+            if light_t != light_past:
+                schedule[t] = real_inters[inter_id][inter_lights.index(light_t)]
+                light_past = light_t
+        api_inter['schedule'] = schedule
+        api_inters.append(api_inter)
+    return api_inters
+
 def evaluate(simulator, period, normal_inters, real_inters, individual):
     '''
     Receives a simulator instance, an intersection map and an individual
     Executes simulation and returns fitness values
     '''
     #Map normalized ids to real ids and calculate times
-    api_inters = []
-    print(individual)
-    for inter_id, inter_lights in normal_inters.items():
-        api_inter = {"id": inter_id, "lights": real_inters[inter_id]}
-        light_past = -1
-        schedule = {}
-        for t in range(period):
-            light_t = individual.pop(0)
-            if light_t != light_past:
-                schedule[t] = real_inters[inter_id][inter_lights.index(light_t)]
-                light_past = light_t
-        api_inter['schedule'] = schedule
-        api_inters.append(api_inter)
-        print(api_inter)
-    simulator.set_traffic_lights(api_inter)
+    api_inters = decode_chromosome(period, normal_inters, real_inters, individual)
+    simulator.reset_statistics()
+    #Change traffic lights and configuration and run simulation
+    simulator.set_traffic_lights(api_inters)
     simulator.fixed_time_start(period * 5)
     
     return simulator.get_average_speed(), simulator.get_stopped_time()
@@ -68,20 +76,21 @@ def fill_toolbox(intersections, period, simulator):
     toolbox = base.Toolbox()
     #Population building components
     toolbox.register("attr_light", random.choice)
-    print(period)
     toolbox.register("individual", build_rand_chromosome, creator.Individual, normal_inters, period, toolbox.attr_light)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     #Register operator
-    toolbox.register("select", tools.selBest)
+    toolbox.register("selectBest", tools.selBest)
+    toolbox.register("selectRest", tools.selRoulette)
     toolbox.register("mate", tools.cxUniform)
     toolbox.register("mutate", tools.mutShuffleIndexes)
+    toolbox.register("decode", decode_chromosome, period, normal_inters, real_inters)
     toolbox.register("evaluate", evaluate, simulator, period, normal_inters, real_inters)
     #Register helper
     toolbox.register("clone", copy.copy)
     
     return toolbox
 
-def find_solution(population=1, max_gen=1, period=10, seed=1992):
+def find_solution(population=100, max_gen=10, period=10, seed=64):
     '''
     Recives configurations for the genetic algorithm: period, seed
     Executes algorithm to find a result
@@ -94,7 +103,7 @@ def find_solution(population=1, max_gen=1, period=10, seed=1992):
     #Register global creator classes
     
     #Fitrness function should maximize average speed and minimize total stopped time
-    creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0,))
+    creator.create("FitnessMin", base.Fitness, weights=(1.0, -0.5))
     #Individual basic definition
     creator.create("Individual", list, fitness=creator.FitnessMin)
     
@@ -109,41 +118,77 @@ def find_solution(population=1, max_gen=1, period=10, seed=1992):
     fitnesses = list(map(toolbox.evaluate, population))
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
-        print(fit)
-
     #Operator probability
     CXPB, MUTPB = 0.5, 0.2
     
     #Iterate generations
-    for g in range(max_gen):
+    g = 0
+    
+    fitness_records = []
+    while g < max_gen:
+        print("g: %s population: %s" % (g, len(population)))
         # Select the next generation individuals
-        offspring = toolbox.select(population, int(len(population) / 2))
+        best_num = int(len(population) * 0.10)
+        offspring = toolbox.selectBest(population, best_num)
         # Clone the selected individuals
-        offspring = map(toolbox.clone, offspring)
+        offspring = list(map(toolbox.clone, offspring))
         offspring = [toolbox.clone(child) for child in offspring]
-        print(offspring)
+        # Select the next generation individuals
+        offspring2 = toolbox.selectRest(population, (len(population) - best_num))
+        # Clone the selected individuals
+        offspring2 = list(map(toolbox.clone, offspring2))
+        
         # Apply crossover on the offspring
-        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+        for child1, child2 in zip(offspring2[::2], offspring2[1::2]):
             if random.random() < CXPB:
                 toolbox.mate(child1, child2, 0.2)
                 del child1.fitness.values
                 del child2.fitness.values
 
         # Apply mutation on the offspring
-        for mutant in offspring:
+        for mutant in offspring2:
             if random.random() < MUTPB:
                 toolbox.mutate(mutant, 0.1)
                 del mutant.fitness.values
-
+        
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        invalid_ind = [ind for ind in offspring2 if not ind.fitness.valid]
+        fitnesses = list(map(toolbox.evaluate, invalid_ind))
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-
+        
+        offspring.extend(offspring2)
+        
+        all_fitness = [ind.fitness.values for ind in offspring]
+        
+        #Calculate fitness statistics
+        avg_fitness_speed = sum(f[0] for f in all_fitness) / len(all_fitness)
+        max_fitness_speed = max(all_fitness, key=itemgetter(0))[0]
+        avg_fitness_stop = sum(f[1] for f in all_fitness) / len(all_fitness)
+        max_fitness_stop = min(all_fitness, key=itemgetter(1))[1]
+        
+        fitness_records.append((avg_fitness_speed, max_fitness_speed, avg_fitness_stop, max_fitness_stop))
+        
+        
         # The population is entirely replaced by the offspring
         population[:]= offspring
-    
+        g += 1
+    #Select the best one
+    best = toolbox.selectBest(population, 1)[0]
+    print(toolbox.decode(best))
+    print(best.fitness.values)
+    f = open(('fit-%s-%s-%s.csv' % (len(population), max_gen, period)), 'w')
+    for record in fitness_records:
+        f.write(str(record)[1:-1] + "\n")
+    f.close()
 
 if __name__ == '__main__':
-    find_solution()
+    #Test population variation
+    gen = 100
+    for t in range(1, 21):
+        print("TEST: population = %s, max_gen = %s" % ((t * 10), gen))
+        import cProfile
+        cProfile.run('find_solution(population=%s, max_gen=%s, period=10)' % ((t * 10), gen))
+    #Find Eddy's result
+    import cProfile
+    cProfile.run('find_solution(population=%s, max_gen=%s, period=%s)' % (200, 100, 30))
