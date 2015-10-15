@@ -282,11 +282,11 @@ def simple_2lane_map(size=5):
         
     for cell in streets[1].cells:
         x = cell.viewer_address[0]
-        cell.viewer_address[0] = size + cell.lane + 1
+        cell.viewer_address[0] = size - cell.lane + 2
         cell.viewer_address[1] = x
     for cell in streets[3].cells:
         x = cell.viewer_address[0]
-        cell.viewer_address[0] = size + cell.lane + 1
+        cell.viewer_address[0] = size - cell.lane + 2
         cell.viewer_address[1] = x + size + 4
         
     for cell in int_.cells + int_.lights:
@@ -421,6 +421,77 @@ def simple_map(size=5):
     return topo
 
 
+def totito_2lane_map(size=5):
+    topo = tca_ng.models.Topology()
+    
+    crosses = []
+    crosses.append(simple_2lane_map(size))
+    crosses.append(simple_2lane_map(size))
+    crosses.append(simple_2lane_map(size))
+    crosses.append(simple_2lane_map(size))
+    
+    side = size * 2 + 3
+    for cell in crosses[1].cells + crosses[1].lights:
+        y = cell.viewer_address[1]
+        cell.viewer_address[1] = side - cell.viewer_address[0]
+        cell.viewer_address[0] = y + side + 1
+    for cell in crosses[2].cells + crosses[2].lights:
+        cell.viewer_address[0] = side * 2 - cell.viewer_address[0] + 1
+        cell.viewer_address[1] = side * 2 - cell.viewer_address[1] + 1
+    for cell in crosses[3].cells + crosses[3].lights:
+        x = cell.viewer_address[0]
+        cell.viewer_address[0] = side - cell.viewer_address[1]
+        cell.viewer_address[1] = x + side + 1
+        
+    crosses[0].cells[3 * size * 2 - 2].connection = crosses[1].cells[size * 2]
+    crosses[0].cells[3 * size * 2 - 1].connection = crosses[1].cells[size * 2 + 1]
+    crosses[2].cells[3 * size * 2 - 2].connection = crosses[3].cells[size * 2]
+    crosses[2].cells[3 * size * 2 - 1].connection = crosses[3].cells[size * 2 + 1]
+    
+    crosses[0].cells[4 * size * 2 - 2].connection = crosses[3].cells[0]
+    crosses[0].cells[4 * size * 2 - 1].connection = crosses[3].cells[1]
+    crosses[2].cells[4 * size * 2 - 2].connection = crosses[1].cells[0]
+    crosses[2].cells[4 * size * 2 - 1].connection = crosses[1].cells[1]
+    
+    crosses[1].cells[size * 2].connection = crosses[0].cells[3 * size * 2 - 2]
+    crosses[1].cells[size * 2 + 1].connection = crosses[0].cells[3 * size * 2 - 1]
+    crosses[3].cells[size * 2].connection = crosses[2].cells[3 * size * 2 - 2]
+    crosses[3].cells[size * 2 + 1].connection = crosses[2].cells[3 * size * 2 - 1]
+    
+    crosses[1].cells[0].connection = crosses[2].cells[4 * size * 2 - 2]
+    crosses[1].cells[1].connection = crosses[2].cells[4 * size * 2 - 1]
+    crosses[3].cells[0].connection = crosses[0].cells[4 * size * 2 - 2]
+    crosses[3].cells[1].connection = crosses[0].cells[4 * size * 2 - 1]
+    
+    
+    crosses[0].cells[3 * size * 2 - 2].front_cell = crosses[1].cells[size * 2]
+    crosses[0].cells[3 * size * 2 - 1].front_cell = crosses[1].cells[size * 2 + 1]
+    crosses[2].cells[3 * size * 2 - 2].front_cell = crosses[3].cells[size * 2]
+    crosses[2].cells[3 * size * 2 - 1].front_cell = crosses[3].cells[size * 2 + 1]
+    
+    crosses[0].cells[4 * size * 2 - 2].front_cell = crosses[3].cells[0]
+    crosses[0].cells[4 * size * 2 - 1].front_cell = crosses[3].cells[1]
+    crosses[2].cells[4 * size * 2 - 2].front_cell = crosses[1].cells[0]
+    crosses[2].cells[4 * size * 2 - 1].front_cell = crosses[1].cells[1]
+    
+    # Eddy hace cosas extrañas
+    # XXX
+        
+    for cross in crosses:
+        for cell in cross.endpoint_cells:
+            if cell.connection is None:
+                topo.endpoint_cells.append(cell)
+        topo.cells += cross.cells
+        topo.lights += cross.lights
+        topo.semaphores += cross.semaphores
+        
+    for cell in topo.cells:
+        cell.topology = topo
+    for semaphore in topo.semaphores:
+        semaphore.topology = topo
+    
+    return topo
+
 def totito_map(size=5):
     topo = tca_ng.models.Topology()
     
@@ -448,6 +519,7 @@ def totito_map(size=5):
     crosses[0].cells[4 * size - 1].connection = crosses[3].cells[0]
     crosses[2].cells[4 * size - 1].connection = crosses[1].cells[0]
 
+    # Eddy
     crosses[0].cells[40].intersection.neighbors.append(crosses[1].cells[40].intersection)
     crosses[2].cells[40].intersection.neighbors.append(crosses[3].cells[40].intersection)
     crosses[0].cells[40].intersection.neighbors.append(crosses[3].cells[40].intersection)

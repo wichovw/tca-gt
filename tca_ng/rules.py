@@ -82,7 +82,7 @@ class StreetRule(Rule):
                 if self.car.waits_for_lane_change >= self.car.changing_route_max_wait:
                     self.car.route = random.choice(self.cell.connection.routes)
                     self.car.waits_for_lane_change = 0
-                    print('deadlock avoidance')
+#                    print('deadlock avoidance')
                 
             self.car.right_change_rate = 1 if dif < 0 else 0
             self.car.lane_changing_rate = (self.cell.cell / self.cell.street.length) * (1 - base) + base

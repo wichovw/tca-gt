@@ -7,17 +7,17 @@ from tca_ng import models
 
 def test():
     tca = models.Automaton()
-    topo = example_maps.simple_2lane_map()
+    topo = example_maps.totito_2lane_map()
     tca.topology = topo
     topo.automaton = tca
     
     print(topo.text_view(desc=True))
     
-    for _ in range(100):
-        print(tca.generation, '-', tca.get_cycle_time())
-        tca.update()
-        print(topo.text_view())
-        print()
-            
-    print(topo.text_view(desc=True))
+#    for _ in range(100):
+#        print(tca.generation, '-', tca.get_cycle_time())
+#        tca.update()
+#        print(topo.text_view())
+#        print()
+#            
+#    print(topo.text_view(desc=True))
     
