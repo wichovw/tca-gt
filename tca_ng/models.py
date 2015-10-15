@@ -71,6 +71,7 @@ class Intersection:
 
     in_streets = []
     out_streets = []
+    neighbors = []
 
     semaphore = None
 
@@ -80,9 +81,9 @@ class Intersection:
         self.cells = []
         self.routes = []
 
-        # Eddy
         self.in_streets = []
         self.out_streets = []
+        self.neighbors = []
         
     def __repr__(self):
         return "<Intersection: %s>" % (self.id)
