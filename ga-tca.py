@@ -6,7 +6,7 @@ from deap import creator
 from deap import tools
 
 from service.tca_service import TCAService
-
+from operator import itemgetter
 
 def get_normalized_lights(traffic_lights):
     '''
@@ -124,6 +124,7 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
     #Iterate generations
     g = 0
     
+    fitness_records = []
     while g < max_gen:
         print("g:"+str(g))
         # Select the next generation individuals
@@ -156,6 +157,14 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
+        #Calculate fitness statistics
+        avg_fitness_speed = sum(f[0] for f in fitnesses) / len(fitnesses)
+        max_fitness_speed = max(fitnesses, key=itemgetter(0))[0]
+        avg_fitness_stop = sum(f[1] for f in fitnesses) / len(fitnesses)
+        max_fitness_stop = min(fitnesses, key=itemgetter(1))[1]
+        
+        fitness_records.append((avg_fitness_speed, max_fitness_speed, avg_fitness_stop, max_fitness_stop))
+        
         offspring.extend(offspring2)
         # The population is entirely replaced by the offspring
         population[:]= offspring
@@ -164,8 +173,13 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
     best = toolbox.selectBest(population, 1)[0]
     print(toolbox.decode(best))
     print(best.fitness.values)
+    print(fitness_records)
+    f = open('fitness.csv', 'w')
+    for record in fitness_records:
+        f.write(str(record)[1:-1] + "\n")
+    f.close()
 
 if __name__ == '__main__':
     import cProfile
-    cProfile.run('find_solution(population=100, max_gen=10, period=30)')
+    cProfile.run('find_solution(population=200, max_gen=200, period=30)')
     
