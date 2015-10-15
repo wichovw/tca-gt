@@ -113,6 +113,11 @@ def simple_intersection(rate=0.8):
     routes[2].cells = [topo.cells[1], topo.cells[4], topo.cells[3]]
     routes[3].cells = [topo.cells[1], topo.cells[4], topo.cells[2]]
     
+    routes[0].entrance_lane = 0
+    routes[1].entrance_lane = 0
+    routes[2].entrance_lane = 0
+    routes[3].entrance_lane = 0
+    
     topo.cells[0].viewer_address = [0, 1]
     topo.cells[0].topology = topo
     topo.cells[0].intersection = int_

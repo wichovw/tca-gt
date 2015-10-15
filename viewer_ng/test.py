@@ -87,7 +87,8 @@ def test():
     
     tca = models.Automaton()
 #    topo = example_maps.generate_wide_street(60, 4)
-    topo = example_maps.grid_2lane_map()
+#    topo = example_maps.grid_2lane_map()
+    topo = example_maps.totito_map(10)
     tca.topology = topo
     topo.automaton = tca
     board = Board(tca)
