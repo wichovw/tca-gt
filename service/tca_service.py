@@ -1,5 +1,5 @@
 from tca_ng.models import Automaton
-from tca_ng.example_maps import totito_map
+from tca_ng.example_maps import totito_map, grid_2lane_map
 import random
 
 
@@ -16,14 +16,17 @@ class TCAService(object):
         -Total stopped time
     """
 
-    def __init__(self):
+    def __init__(self, map = 1):
         """
         TCAService __init__
         :return:
         """
         # Automaton
         self._automaton = Automaton()
-        self._automaton.topology = totito_map(10)
+        if map == 1:
+            self._automaton.topology = totito_map(10)
+        elif map == 2:
+            self._automaton.topology = grid_2lane_map()
         self._automaton.topology.automaton = self._automaton
 
         # Class attributes
