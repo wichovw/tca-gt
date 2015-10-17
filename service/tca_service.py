@@ -16,7 +16,7 @@ class TCAService(object):
         -Total stopped time
     """
 
-    def __init__(self, map = 1):
+    def __init__(self, map = 1, rate=0.8):
         """
         TCAService __init__
         :return:
@@ -160,6 +160,28 @@ class TCAService(object):
 
         # TODO get real value
         return 3
+
+    def get_cycle_size(self):
+        """
+        Get automaton cycle size
+        :return: cycle size
+        """
+
+        return self._automaton.cycle
+
+    def set_cycle_size(self, cycle_size):
+        """
+        Set automaton cycle size
+        :param cycle_size: Cycle size
+        :return: True if changed correctly
+        """
+
+        try:
+            self._automaton.cycle = cycle_size
+        except:
+            return False
+
+        return True
 
     def get_intersections(self):
         """
