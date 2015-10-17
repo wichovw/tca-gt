@@ -10,28 +10,32 @@ class Automaton:
     def get_cycle_time(self):
         return self.generation % self.cycle
     
+    def sync_update(self, func):
+        # Instantiation & population of rules
+        for cell in self.topology.cells:
+            cell.rule = cell.rule_class(cell)
+
+        # Calculation of new values
+        for cell in self.topology.cells:
+            func(cell)
+            
+        # Syncronous application of new values
+        for cell in self.topology.cells:
+            cell.rule.apply_()
+    
     def update(self):
+        # Generation and consumption of cars
         for cell in self.topology.endpoint_cells:
             rule = cell.endpoint_rule_class(cell)
             rule.apply_()
 
-        for cell in self.topology.cells:
-            cell.rule = cell.rule_class(cell)
-
-        for cell in self.topology.cells:
-            cell.rule.pre_setting()
-        for cell in self.topology.cells:
-            cell.rule.apply_()
+        # Configuration changes on map 
+        self.sync_update(lambda x: x.rule.pre_setting())
+        
+        # Cars movement rules application
+        self.sync_update(lambda x: x.rule.calculate())
             
-        for cell in self.topology.cells:
-            cell.rule = cell.rule_class(cell)
-
-        for cell in self.topology.cells:
-            cell.rule.calculate()
-
-        for cell in self.topology.cells:
-            cell.rule.apply_()
-            
+        # Update of semaphores states
         for semaphore in self.topology.semaphores:
             semaphore.update()
             

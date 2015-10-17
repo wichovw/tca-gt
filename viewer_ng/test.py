@@ -8,7 +8,7 @@ from pygame import locals
 # number of iterations per second
 speed = 10
 # size of squares in pixels
-square_size = 16
+square_size = 12
 
 def get_color(cell):
     if isinstance(cell, cells.StreetCell):
@@ -87,8 +87,8 @@ def test():
     
     tca = models.Automaton()
 #    topo = example_maps.generate_wide_street(60, 4)
-#    topo = example_maps.grid_2lane_map()
-    topo = example_maps.totito_map(10)
+    topo = example_maps.grid_2lane_map(size=5, width=2, height=1)
+#    topo = example_maps.totito_map(10)
     tca.topology = topo
     topo.automaton = tca
     board = Board(tca)
@@ -146,6 +146,7 @@ def test():
             elapsed = 0
             update()
             
+        pygame.display.set_caption('%s' % tca.generation)
         pygame.display.flip()
     
 pygame.quit()
