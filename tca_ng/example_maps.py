@@ -593,22 +593,22 @@ def simple_2_streets(size=5):
         
     return topo
 
-def grid_2lane_map(size=5, grid=2):
+def grid_2lane_map(size=5, width=2, height=2):
     topo = tca_ng.models.Topology()
     
     totitos = []
     matrix = []
-    for _ in range(grid):
+    for _ in range(height):
         row = []
         matrix.append(row)
-        for __ in range(grid):
+        for __ in range(width):
             totito = totito_2lane_map(size)
             row.append(totito)
             totitos.append(totito)
     
     totito_size = size * 4 + 8
-    for i in range(grid):
-        for j in range(grid):
+    for i in range(height):
+        for j in range(width):
             totito = matrix[i][j]
             
             for cell in totito.cells + totito.lights:
@@ -622,7 +622,7 @@ def grid_2lane_map(size=5, grid=2):
                 totito.cells[81].connection = matrix[i - 1][j].cells[115]
                 totito.cells[80].front_cell = matrix[i - 1][j].cells[114]
                 totito.cells[81].front_cell = matrix[i - 1][j].cells[115]
-            if i < grid - 1:
+            if i < height - 1:
                 totito.cells[114].connection = matrix[i + 1][j].cells[80]
                 totito.cells[115].connection = matrix[i + 1][j].cells[81]
                 totito.cells[184].connection = matrix[i + 1][j].cells[10]
@@ -636,7 +636,7 @@ def grid_2lane_map(size=5, grid=2):
                 totito.cells[195].connection = matrix[i][j - 1].cells[105]
                 totito.cells[194].front_cell = matrix[i][j - 1].cells[104]
                 totito.cells[195].front_cell = matrix[i][j - 1].cells[105]
-            if j < grid - 1:
+            if j < width - 1:
                 totito.cells[90].connection = matrix[i][j + 1].cells[0]
                 totito.cells[91].connection = matrix[i][j + 1].cells[1]
                 totito.cells[104].connection = matrix[i][j + 1].cells[194]
