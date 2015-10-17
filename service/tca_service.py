@@ -91,9 +91,9 @@ class TCAService(object):
         :return: List containing streets information in this format
 
             [
-                {'id': 0, 'cars_number': 9, 'average_speed': 2.5},
-                {'id': 1, 'cars_number': 11, 'average_speed': 3.1},
-                {'id': 2, 'cars_number': 9, 'average_speed': 2.3}
+                {'id': 0, 'cars_number': 9, 'average_speed': 2.5, 'green_light': 0},
+                {'id': 1, 'cars_number': 11, 'average_speed': 3.1, 'green_light': 1},
+                {'id': 2, 'cars_number': 9, 'average_speed': 2.3, 'green_light': None}
             ]
 
         """
@@ -380,7 +380,17 @@ class TCAService(object):
 
         # Clean streets list
         self.streets = []
+        free_routes = []
 
+        # Get free routes
+        for light in self._automaton.topology.lights:
+
+            # If light is green add all routes
+            if light.free:
+                for route in light.routes:
+                    free_routes.append(route)
+
+        # Iterate all streets in simulator map
         for street in self._automaton.topology.streets:
 
             # Create new dictionary and add street id
@@ -405,6 +415,18 @@ class TCAService(object):
             else:
                 street_dict['cars_number'] = 0
                 street_dict['average_speed'] = 0
+
+            # Verify if light is green
+            green = 1
+
+            if not street.exit_routes:
+                green = None
+            else:
+                for route in street.exit_routes:
+                    if route not in free_routes:
+                        green = 0
+
+            street_dict['green_light'] = green
 
             # Add intersection to intersection list
             self.streets.append(street_dict)
