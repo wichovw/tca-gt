@@ -26,7 +26,7 @@ class TCAService(object):
         if map == 1:
             self._automaton.topology = totito_map(10)
         elif map == 2:
-            self._automaton.topology = grid_2lane_map()
+            self._automaton.topology = grid_2lane_map(5, 2, 1)
         self._automaton.topology.automaton = self._automaton
 
         # Class attributes
@@ -417,14 +417,20 @@ class TCAService(object):
                 street_dict['average_speed'] = 0
 
             # Verify if light is green
-            green = 1
+            green = None
 
-            if not street.exit_routes:
-                green = None
-            else:
+            if street.exit_routes:
+                exit_counter = 0
+
                 for route in street.exit_routes:
                     if route not in free_routes:
                         green = 0
+                    else:
+                        exit_counter += 1
+
+                if green != 0:
+                    if exit_counter == len(street.exit_routes):
+                        green = 1
 
             street_dict['green_light'] = green
 
