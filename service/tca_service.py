@@ -26,7 +26,7 @@ class TCAService(object):
         if map == 1:
             self._automaton.topology = totito_map(10)
         elif map == 2:
-            self._automaton.topology = grid_2lane_map()
+            self._automaton.topology = grid_2lane_map(5)
         self._automaton.topology.automaton = self._automaton
 
         # Class attributes
