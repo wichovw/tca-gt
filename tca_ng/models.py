@@ -129,15 +129,25 @@ class Semaphore:
     
     def set_schedule(self, schedule):
         prev = None
+        self.active = 0
+        cycle_time = 0
+        if len(self.schedule) > 0:
+            self.get_active_light().free = False
+            cycle_time = self.topology.automaton.get_cycle_time()
+        self.schedule = {}
         for period_start in sorted(schedule):
             light = schedule[period_start]
             self.schedule[period_start] = {
                 'light': light,
                 'change': 0,
             }
+            if period_start <= cycle_time:
+                self.active = period_start
             if prev is not None:
                 self.schedule[prev]['change'] = period_start
             prev = period_start
+        self.get_active_light().free = True
+        
             
     def get_schedule(self):
         schedule = dict()
