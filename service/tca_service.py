@@ -178,7 +178,9 @@ class TCAService(object):
 
         try:
             self._automaton.cycle = cycle_size
-        except:
+        except Exception as e:
+            print('\nERROR: Cycle size could not be changed!')
+            print('Exception message: {} \n'.format(e))
             return False
 
         return True
@@ -224,9 +226,9 @@ class TCAService(object):
         Set traffic lights schedule:
 
             [
-                {'id': 0, 'schedule': {0: 0, 5: 1},
-                {'id': 1, 'schedule': {0: 2, 4: 3},
-                {'id': 2, 'schedule': {2: 4, 6: 5}
+                {'id': 0, 'schedule': {0: 0, 5: 1}},
+                {'id': 1, 'schedule': {0: 2, 4: 3}},
+                {'id': 2, 'schedule': {2: 4, 6: 5}}
             ]
         :param traffic_light_schedule: Dictionary containing traffic lights schedule
         :return: True if traffic lights schedule changed correctly
