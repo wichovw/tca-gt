@@ -72,7 +72,7 @@ class Sarsa(object):
       return coord
     
     #Active tiles for tile coding
-    def activeTiles(self,state,tilings=1):
+    def activeTiles(self,state,tilings=10):
       
       tiles = []
       
