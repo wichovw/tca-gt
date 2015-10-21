@@ -184,11 +184,11 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
 
 if __name__ == '__main__':
     #Test population variation
-    gen = 100
-    for t in range(1, 21):
-        print("TEST: population = %s, max_gen = %s" % ((t * 10), gen))
-        import cProfile
-        cProfile.run('find_solution(population=%s, max_gen=%s, period=10)' % ((t * 10), gen))
+    # gen = 100
+    # for t in range(1, 21):
+    #     print("TEST: population = %s, max_gen = %s" % ((t * 10), gen))
+    #     import cProfile
+    #     cProfile.run('find_solution(population=%s, max_gen=%s, period=10)' % ((t * 10), gen))
     #Find Eddy's result
     import cProfile
     cProfile.run('find_solution(population=%s, max_gen=%s, period=%s)' % (200, 100, 30))
