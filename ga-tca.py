@@ -65,7 +65,8 @@ def evaluate(simulator, period, normal_inters, real_inters, individual):
     simulator.set_traffic_lights(api_inters)
     simulator.fixed_time_start(period * 5)
     
-    return simulator.get_average_speed(), simulator.get_stopped_time()
+    # return simulator.get_average_speed(), simulator.get_stopped_time()
+    return simulator.get_average_speed(),
 
 def fill_toolbox(intersections, period, simulator):
     '''
@@ -103,7 +104,8 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
     #Register global creator classes
     
     #Fitrness function should maximize average speed and minimize total stopped time
-    creator.create("FitnessMin", base.Fitness, weights=(1.0, -0.5))
+    # creator.create("FitnessMin", base.Fitness, weights=(1.0, -0.001))
+    creator.create("FitnessMin", base.Fitness, weights=(1.0,))
     #Individual basic definition
     creator.create("Individual", list, fitness=creator.FitnessMin)
     
@@ -164,11 +166,12 @@ def find_solution(population=100, max_gen=10, period=10, seed=64):
         #Calculate fitness statistics
         avg_fitness_speed = sum(f[0] for f in all_fitness) / len(all_fitness)
         max_fitness_speed = max(all_fitness, key=itemgetter(0))[0]
-        avg_fitness_stop = sum(f[1] for f in all_fitness) / len(all_fitness)
-        max_fitness_stop = min(all_fitness, key=itemgetter(1))[1]
+        # avg_fitness_stop = sum(f[1] for f in all_fitness) / len(all_fitness)
+        # max_fitness_stop = min(all_fitness, key=itemgetter(1))[1]
         
-        fitness_records.append((avg_fitness_speed, max_fitness_speed, avg_fitness_stop, max_fitness_stop))
-        
+        # fitness_records.append((avg_fitness_speed, max_fitness_speed, avg_fitness_stop, max_fitness_stop))
+        fitness_records.append((avg_fitness_speed, max_fitness_speed))
+
         
         # The population is entirely replaced by the offspring
         population[:]= offspring
@@ -191,4 +194,5 @@ if __name__ == '__main__':
     #     cProfile.run('find_solution(population=%s, max_gen=%s, period=10)' % ((t * 10), gen))
     #Find Eddy's result
     import cProfile
-    cProfile.run('find_solution(population=%s, max_gen=%s, period=%s)' % (200, 100, 30))
+    # cProfile.run('find_solution(population=%s, max_gen=%s, period=%s)' % (50, 50, 10))
+    cProfile.run('find_solution(population=%s, max_gen=%s, period=%s)' % (100, 50, 15))

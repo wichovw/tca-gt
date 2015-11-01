@@ -268,14 +268,14 @@ def simple_2lane_intersection(rate=0.8):
     
     return topo
 
-def simple_2lane_map(size=5):
+def simple_2lane_map(size=5, rate=0.8):
     topo = tca_ng.models.Topology()
     
     streets = []
-    streets.append(generate_wide_street(size, 2))
-    streets.append(generate_wide_street(size, 2))
-    streets.append(generate_wide_street(size, 2))
-    streets.append(generate_wide_street(size, 2))
+    streets.append(generate_wide_street(size, 2, rate))
+    streets.append(generate_wide_street(size, 2, rate))
+    streets.append(generate_wide_street(size, 2, rate))
+    streets.append(generate_wide_street(size, 2, rate))
     
     int_ = simple_2lane_intersection()
     
@@ -358,14 +358,14 @@ def simple_2lane_map(size=5):
         
     return topo
 
-def simple_map(size=5):
+def simple_map(size=5, rate=0.8):
     topo = tca_ng.models.Topology()
     
     streets = []
-    streets.append(generate_street(size))
-    streets.append(generate_street(size))
-    streets.append(generate_street(size))
-    streets.append(generate_street(size))
+    streets.append(generate_street(size, rate))
+    streets.append(generate_street(size, rate))
+    streets.append(generate_street(size, rate))
+    streets.append(generate_street(size, rate))
     
     int_ = simple_intersection()
     
@@ -435,14 +435,14 @@ def simple_map(size=5):
     return topo
 
 
-def totito_2lane_map(size=5):
+def totito_2lane_map(size=5, rate=0.8):
     topo = tca_ng.models.Topology()
     
     crosses = []
-    crosses.append(simple_2lane_map(size))
-    crosses.append(simple_2lane_map(size))
-    crosses.append(simple_2lane_map(size))
-    crosses.append(simple_2lane_map(size))
+    crosses.append(simple_2lane_map(size, rate))
+    crosses.append(simple_2lane_map(size, rate))
+    crosses.append(simple_2lane_map(size, rate))
+    crosses.append(simple_2lane_map(size, rate))
     
     side = size * 2 + 3
     for cell in crosses[1].cells + crosses[1].lights:
@@ -513,14 +513,14 @@ def totito_2lane_map(size=5):
     
     return topo
 
-def totito_map(size=5):
+def totito_map(size=5, rate=0.8):
     topo = tca_ng.models.Topology()
     
     crosses = []
-    crosses.append(simple_map(size))
-    crosses.append(simple_map(size))
-    crosses.append(simple_map(size))
-    crosses.append(simple_map(size))
+    crosses.append(simple_map(size, rate))
+    crosses.append(simple_map(size, rate))
+    crosses.append(simple_map(size, rate))
+    crosses.append(simple_map(size, rate))
     
     side = size * 2 + 2
     for cell in crosses[1].cells + crosses[1].lights:
@@ -584,11 +584,11 @@ def totito_map(size=5):
     return topo
     
         
-def simple_2_streets(size=5):
+def simple_2_streets(size=5, rate=0.8):
     topo = tca_ng.models.Topology()
     
-    street1 = generate_street(size)
-    street2 = generate_street(size)
+    street1 = generate_street(size, rate)
+    street2 = generate_street(size, rate)
     
     for cell in street2.cells:
         cell.viewer_address[0] += size
@@ -609,7 +609,7 @@ def simple_2_streets(size=5):
         
     return topo
 
-def grid_2lane_map(size=5, width=2, height=2):
+def grid_2lane_map(size=5, width=2, height=2, rate=0.8):
     topo = tca_ng.models.Topology()
     
     totitos = []
@@ -618,7 +618,7 @@ def grid_2lane_map(size=5, width=2, height=2):
         row = []
         matrix.append(row)
         for __ in range(width):
-            totito = totito_2lane_map(size)
+            totito = totito_2lane_map(size, rate)
             row.append(totito)
             totitos.append(totito)
     

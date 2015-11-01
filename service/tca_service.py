@@ -1,4 +1,4 @@
-from tca_ng.models import Automaton
+from tca_ng.models import Automaton, Semaphore, Light
 from tca_ng.example_maps import totito_map, grid_2lane_map
 import random
 
@@ -16,18 +16,28 @@ class TCAService(object):
         -Total stopped time
     """
 
-    def __init__(self, map = 1, rate=0.8):
+    def __init__(self, map=1, rate=0.2, seed=0):
         """
         TCAService __init__
         :return:
         """
         # Automaton
         self._automaton = Automaton()
+
+        Semaphore.id = 0
+        Light.id = 0
+
         if map == 1:
-            self._automaton.topology = totito_map(10)
+            self._automaton.topology = totito_map(10, rate)
         elif map == 2:
-            self._automaton.topology = grid_2lane_map(5)
+            self._automaton.topology = grid_2lane_map(5, 2, 1, rate)
+        elif map == 3:
+            self._automaton.topology = grid_2lane_map(5, 2, 2, rate)
         self._automaton.topology.automaton = self._automaton
+
+        self.map = map
+        self.rate = rate
+        self.seed = seed
 
         # Class attributes
         self.traffic_lights = []
@@ -44,6 +54,8 @@ class TCAService(object):
         self.intersections = []
         self.streets = []
         self.iteration = 0
+
+        self.printable_statistics = []
 
         # Build data from map
         self._build_traffic_lights()
@@ -83,7 +95,7 @@ class TCAService(object):
         # Success
         return True
 
-    def dynamic_time_update(self, cycle_count=5, all_data=False):
+    def dynamic_time_update(self, cycle_count=5, all_data=True):
         """
         Simulation update using dynamic time strategy
         :param cycle_count: Number of updates to be simulated
@@ -106,12 +118,12 @@ class TCAService(object):
                 self.iteration += 1
                 self._update_data()
 
+                # Print obtained data to file
+                if all_data:
+                    self._print_data()
+
             # Process obtained data
             self._process_data()
-
-            # Print obtained data to file
-            if all_data:
-                self._print_data()
 
         except Exception as e:
             print('\nERROR: Simulator raised an exception!')
@@ -122,17 +134,136 @@ class TCAService(object):
         self._build_streets()
         return self.streets
 
-    def random_fixed_time_start(self, cycle_count=60, min_time=5, max_time=20, all_data=False):
-        raise NotImplementedError
+    def random_fixed_time_start(self, cycle_count=60, all_data=False):
 
-    def random_dynamic_time_start(self, cycle_count=60, variation_time=5, all_data=False):
-        raise NotImplementedError
+        # Set simulation values
+        self._cycle_count = cycle_count
+
+        # Generate random schedule and set it
+        schedule = []
+
+        for traffic_light in self.get_traffic_lights():
+            schedule_dict = dict()
+            schedule_dict['id'] = traffic_light['id']
+
+            light_dict = dict()
+            light_dict[0] = random.choice(traffic_light['lights'])
+            for light in traffic_light['lights']:
+
+                start = random.randint(0, self.get_cycle_size())
+
+                light_dict[start] = light
+
+            schedule_dict['schedule'] = light_dict
+
+            schedule.append(schedule_dict)
+
+        self.set_traffic_lights(schedule)
+
+        try:
+
+            # Simulate and get data from TCA simulator
+            for i in range(cycle_count):
+                self._automaton.update()
+                self.iteration += 1
+                self._update_data()
+
+            # Process obtained data
+            self._process_data()
+
+            # Print obtained data to file
+            if all_data:
+                self._print_data()
+
+        except Exception as e:
+            print('\nERROR: Simulator raised an exception!')
+            print('Exception message: {} \n'.format(e))
+            return False
+
+        # Success
+        return True
+
+    def random_dynamic_time_start(self, cycle_count=60, variation_time=5, rate=0.8, all_data=False):
+
+        # Set simulation values
+        self._cycle_count = cycle_count
+
+        try:
+
+            # Simulate and get data from TCA simulator
+            for i in range(cycle_count):
+                self._automaton.update()
+                self.iteration += 1
+                self._update_data()
+
+                # Verify if a change is needed
+                if random.random() < rate:
+
+                    # Generate random schedule and set it
+                    schedule = []
+
+                    for traffic_light in self.get_traffic_lights():
+
+                        if random.random() < rate:
+                            schedule_dict = dict()
+                            schedule_dict['id'] = traffic_light['id']
+
+                            light_dict = dict()
+                            light_dict[0] = random.choice(traffic_light['lights'])
+                            for light in traffic_light['lights']:
+
+                                delta = random.randint(-variation_time, variation_time)
+                                start = 0
+
+                                for k, v in traffic_light['schedule'].items():
+                                    if v == traffic_light:
+                                        start = k
+
+                                start += delta
+                                start = min(start, self.get_cycle_size())
+                                start = max(start, 0)
+
+                                light_dict[start] = light
+
+                            schedule_dict['schedule'] = light_dict
+
+                            schedule.append(schedule_dict)
+
+                    self.set_traffic_lights(schedule)
+
+            # Process obtained data
+            self._process_data()
+
+            # Print obtained data to file
+            if all_data:
+                self._print_data()
+
+        except NotImplementedError:
+            pass
+        # except Exception as e:
+        #     print('\nERROR: Simulator raised an exception!')
+        #     print('Exception message: {} \n'.format(e))
+        #     return False
+
+        # Success
+        return True
 
     def reset_statistics(self):
         """
         Reset statistics to zero or empty
         :return:
         """
+        Semaphore.id = 0
+        Light.id = 0
+
+        self._automaton = Automaton()
+        if self.map == 1:
+            self._automaton.topology = totito_map(10, self.rate)
+        elif self.map == 2:
+            self._automaton.topology = grid_2lane_map(5, 2, 2, self.rate)
+        elif self.map == 3:
+            self._automaton.topology = grid_2lane_map(5, 2, 2, self.rate)
+        self._automaton.topology.automaton = self._automaton
 
         self.average_speed = 0
         self.step_average_speed = []
@@ -143,6 +274,10 @@ class TCAService(object):
         self.step_car_number = []
         self._cycle_count = 0
         self.iteration = 0
+
+        # Build data from map
+        self._build_traffic_lights()
+        self._build_intersections()
 
     def get_actual_iteration(self):
         """
@@ -199,9 +334,6 @@ class TCAService(object):
         """
 
         return self.intersections
-
-    def get_extended_intersections(self):
-        raise NotImplementedError
 
     def get_traffic_lights(self):
         """
@@ -348,13 +480,19 @@ class TCAService(object):
                 cycle_stopped_time += 1
             cumulative_speed += car.speed
 
-        self.step_average_speed.append(cumulative_speed / len(self._automaton.topology.cars))
+        if len(self._automaton.topology.cars) > 0:
+            self.step_average_speed.append(cumulative_speed / len(self._automaton.topology.cars))
+        else:
+            self.step_average_speed.append(0)
 
         # Update stopped time
         self.step_stopped_time.append(cycle_stopped_time)
 
         # Update cars number
         self.step_car_number.append(len(self._automaton.topology.cars))
+
+        # Update printable statistics
+        self.printable_statistics.append((self.iteration, self.step_average_speed[-1], self.step_stopped_time[-1], self.step_car_number[-1]))
 
     def _process_data(self):
         """
@@ -372,7 +510,12 @@ class TCAService(object):
         self.average_stopped_time = sum(self.step_stopped_time) / float(len(self.step_stopped_time))
 
     def _print_data(self):
-        raise NotImplementedError
+
+        file = open('statistics-{}-{}.csv'.format(self.map, self.rate), 'w')
+
+        for record in self.printable_statistics:
+            file.write(str(record)[1:-1] + '\n')
+        file.close()
 
     def _build_streets(self):
         """

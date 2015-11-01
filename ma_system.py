@@ -14,7 +14,7 @@ def main():
     
   service.set_cycle_size(5)
   
-  while service.get_actual_iteration()<500000:
+  while service.get_actual_iteration() < 1000:
     infoAgent.updateSchedule()
     infoAgent.update()
     input("Good luck:"+str(service.get_actual_iteration()))
