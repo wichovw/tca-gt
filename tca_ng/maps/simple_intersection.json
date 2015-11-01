@@ -1,0 +1,276 @@
+{
+  "topology": {
+    "name": "simple_intersection",
+    "streets": [
+      {
+        "name": "0",
+        "length": 3,
+        "lanes": 0,
+        "exit_routes": ["0", "1"]
+      },
+      {
+        "name": "1",
+        "length": 3,
+        "lanes": 0,
+        "exit_routes": ["2", "3"]
+      },
+      {
+        "name": "2",
+        "length": 3,
+        "lanes": 0,
+        "exit_routes": []
+      },
+      {
+        "name": "3",
+        "length": 3,
+        "lanes": 0,
+        "exit_routes": []
+      }
+    ],
+    "cells": [
+      {
+        "type": "StreetEntranceCell",
+        "name": "0",
+        "viewer_address": [0, 4],
+        "street": "0",
+        "lane": 0,
+        "cell": 0,
+        "neighbours": {
+          "front_cell": "1"
+        }
+      },
+      {
+        "type": "StreetCell",
+        "name": "1",
+        "viewer_address": [1, 4],
+        "street": "0",
+        "lane": 0,
+        "cell": 1,
+        "neighbours": {
+          "front_cell": "2"
+        }
+      },
+      {
+        "type": "StreetExitCell",
+        "name": "2",
+        "viewer_address": [2, 4],
+        "street": "0",
+        "lane": 0,
+        "cell": 2,
+        "neighbours": {
+          "front_cell": "12",
+          "connection": "12"
+        }
+      },
+      {
+        "type": "StreetEntranceCell",
+        "name": "3",
+        "viewer_address": [4, 0],
+        "street": "1",
+        "lane": 0,
+        "cell": 0,
+        "neighbours": {
+          "front_cell": "4"
+        }
+      },
+      {
+        "type": "StreetCell",
+        "name": "4",
+        "viewer_address": [4, 1],
+        "street": "1",
+        "lane": 0,
+        "cell": 1,
+        "neighbours": {
+          "front_cell": "5"
+        }
+      },
+      {
+        "type": "StreetExitCell",
+        "name": "5",
+        "viewer_address": [4, 2],
+        "street": "1",
+        "lane": 0,
+        "cell": 2,
+        "neighbours": {
+          "front_cell": "13",
+          "connection": "13"
+        }
+      },
+      {
+        "type": "StreetEntranceCell",
+        "name": "6",
+        "viewer_address": [6, 4],
+        "street": "2",
+        "lane": 0,
+        "cell": 0,
+        "neighbours": {
+          "front_cell": "7",
+          "connection": "14"
+        }
+      },
+      {
+        "type": "StreetCell",
+        "name": "7",
+        "viewer_address": [7, 4],
+        "street": "2",
+        "lane": 0,
+        "cell": 1,
+        "neighbours": {
+          "front_cell": "8"
+        }
+      },
+      {
+        "type": "StreetExitCell",
+        "name": "8",
+        "viewer_address": [8, 4],
+        "street": "2",
+        "lane": 0,
+        "cell": 2,
+        "neighbours": {}
+      },
+      {
+        "type": "StreetEntranceCell",
+        "name": "9",
+        "viewer_address": [4, 6],
+        "street": "3",
+        "lane": 0,
+        "cell": 0,
+        "neighbours": {
+          "front_cell": "10",
+          "connection": "15"
+        }
+      },
+      {
+        "type": "StreetCell",
+        "name": "10",
+        "viewer_address": [4, 7],
+        "street": "3",
+        "lane": 0,
+        "cell": 1,
+        "neighbours": {
+          "front_cell": "11"
+        }
+      },
+      {
+        "type": "StreetExitCell",
+        "name": "11",
+        "viewer_address": [4, 8],
+        "street": "3",
+        "lane": 0,
+        "cell": 2,
+        "neighbours": {}
+      },
+      {
+        "type": "IntersectionEntranceCell",
+        "name": "12",
+        "viewer_address": [3, 4],
+        "neighbours": {
+          "connection": "2"
+        }
+      },
+      {
+        "type": "IntersectionEntranceCell",
+        "name": "13",
+        "viewer_address": [4, 3],
+        "neighbours": {
+          "connection": "5"
+        }
+      },
+      {
+        "type": "IntersectionExitCell",
+        "name": "14",
+        "viewer_address": [5, 4],
+        "neighbours": {
+          "connection": "6"
+        }
+      },
+      {
+        "type": "IntersectionExitCell",
+        "name": "15",
+        "viewer_address": [4, 5],
+        "neighbours": {
+          "connection": "9"
+        }
+      },
+      {
+        "type": "IntersectionCell",
+        "name": "16",
+        "viewer_address": [4, 4],
+        "neighbours": {}
+      }
+    ],
+    "intersections": [
+      {
+        "name": "0"
+      }
+    ],
+    "routes": [
+      {
+        "name": "0",
+        "intersection": "0",
+        "cells": ["12", "16", "14"],
+        "entrance_lane": 0
+      },
+      {
+        "name": "1",
+        "intersection": "0",
+        "cells": ["12", "16", "15"],
+        "entrance_lane": 0
+      },
+      {
+        "name": "2",
+        "intersection": "0",
+        "cells": ["13", "16", "15"],
+        "entrance_lane": 0
+      },
+      {
+        "name": "3",
+        "intersection": "0",
+        "cells": ["13", "16", "14"],
+        "entrance_lane": 0
+      }
+    ],
+    "semaphores": [
+      {
+        "name": "0",
+        "intersection": "0",
+        "schedule": {
+          "0": "0",
+          "20": "1"
+        }
+      }
+    ],
+    "lights": [
+      {
+        "name": "0",
+        "semaphore": "0",
+        "viewer_address": [3, 5],
+        "routes": ["0", "1"]
+      },
+      {
+        "name": "1",
+        "semaphore": "0",
+        "viewer_address": [3, 3],
+        "routes": ["2", "3"]
+      }
+    ],
+    "endpoints": [
+      {
+        "cell": "0",
+        "rate": 0.8
+      },
+      {
+        "cell": "3",
+        "rate": 0.8
+      },
+      {
+        "cell": "8",
+        "rate": 0.8
+      },
+      {
+        "cell": "11",
+        "rate": 0.8
+      }
+    ]
+  }
+}

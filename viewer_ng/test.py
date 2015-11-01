@@ -1,14 +1,38 @@
 import pygame
 import random
 from viewer_ng.image_creator import create_tiles
-from tca_ng import cells, models, example_maps
+from tca_ng import cells, models, example_maps, cars
 from pygame import locals
 
 
 # number of iterations per second
 speed = 10
 # size of squares in pixels
-square_size = 12
+square_size = 16
+
+#tca = models.Automaton()
+#topo = example_maps.grid_2lane_map(width=2, height=2)
+#tca.topology = topo
+#topo.automaton = tca
+
+#tca.update()
+#car = topo.cars[0]
+#lista = [0]
+#speeds = [0]
+#for _ in range(1000):
+#    if car in topo.cars:
+#        lista.append(car.cell.id)
+#        speeds.append(car.speed)
+#    else:
+#        break
+#    tca.update()
+#    print(_)
+#cells.Cell.id = 0
+#
+#for s in speeds:
+#    print(s)
+#    
+#print (len(speeds))
 
 def get_color(cell):
     if isinstance(cell, cells.StreetCell):
@@ -21,12 +45,17 @@ def get_color(cell):
         color = 'exit'
     elif isinstance(cell, models.Light):
         color = 'green' if cell.free else 'red'
+#        color = 'oob'
     else:
         color = 'oob'
         
     if isinstance(cell, cells.Cell):
         if cell.car is not None:
             color = 'special_car' if cell.car.id % 10 == 0 else 'car'
+#            color = 'car'
+#            
+#    if isinstance(cell, cells.Cell) and cell.id in lista:
+#        color = 'exit'
             
     return color
 
@@ -80,18 +109,34 @@ class Board:
                 tiles[cell.color],
                 cell.absolute_location(square_size)
             )
-
+            
 def test():
     create_tiles(square_size)
     pygame.init()
     
     tca = models.Automaton()
 #    topo = example_maps.generate_wide_street(60, 4)
-    topo = example_maps.grid_2lane_map(size=5, width=2, height=1)
-#    topo = example_maps.totito_map(10)
+#    topo = example_maps.grid_2lane_map()
+    topo = example_maps.totito_map(10)
+#    topo = example_maps.generate_street(25)
     tca.topology = topo
     topo.automaton = tca
     board = Board(tca)
+    
+#    topo.cells[0].connection = topo.cells[-1]
+#    topo.cells[-1].connection = topo.cells[0]
+#    topo.cells[-1].front_cell = topo.cells[0]
+#    m_cells = [c for c in topo.cells]
+#    for _ in range(5):
+#        cell = random.choice(m_cells)
+#        car = cars.Car()
+#        car.cell = cell
+#        car.speed = 0
+#        car.v_max = 1
+#        cell.car = car
+#        cell.street.car_entry(car)
+#        topo.cars.append(car)
+#        m_cells.remove(cell)
     
     width = board.size[0] * square_size
     height = board.size[1] * square_size
@@ -149,4 +194,68 @@ def test():
         pygame.display.set_caption('%s' % tca.generation)
         pygame.display.flip()
     
-pygame.quit()
+    pygame.quit()
+    
+def start_viewer(topology, square_size=16, speed=10):
+    create_tiles(square_size)
+    pygame.init()
+    
+    tca = models.Automaton()
+    tca.topology = topology
+    topology.automaton = tca
+    board = Board(tca)
+    
+    width = board.size[0] * square_size
+    height = board.size[1] * square_size
+    screen_size = (width, height)
+    
+    screen = pygame.display.set_mode(screen_size)
+    clock = pygame.time.Clock()
+    
+    tiles = {
+        'red': pygame.image.load('viewer_ng/res/red_%s.png' % square_size).convert(),
+        'green': pygame.image.load('viewer_ng/res/green_%s.png' % square_size).convert(),
+        'entrance': pygame.image.load('viewer_ng/res/entrance_%s.png' % square_size).convert(),
+        'exit': pygame.image.load('viewer_ng/res/exit_%s.png' % square_size).convert(),
+        'street': pygame.image.load('viewer_ng/res/street_%s.png' % square_size).convert(),
+        'oob': pygame.image.load('viewer_ng/res/oob_%s.png' % square_size).convert(),
+        'car': pygame.image.load('viewer_ng/res/car_%s.png' % square_size).convert(),
+        'special_car': pygame.image.load('viewer_ng/res/special_car_%s.png' % square_size).convert(),
+        'intersection': pygame.image.load('viewer_ng/res/intersection_%s.png' % square_size).convert(),
+    }
+    
+    elapsed = 0
+    run = False
+    done = False
+    
+    board.draw(screen, tiles)
+    pygame.display.flip()
+    
+    def update():
+        tca.update()
+        board.update()
+        board.draw(screen, tiles)
+        
+    while done == False:
+        elapsed += clock.tick(60)
+        for event in pygame.event.get():
+            if event.type == locals.QUIT:
+                done = True
+            if event.type == locals.KEYDOWN:
+                if event.key == locals.K_SPACE:
+                    run = not run
+            if event.type == locals.KEYUP:
+                if event.key == locals.K_q:
+                    done = True
+                elif event.key == locals.K_n:
+                    run = False
+                    update()
+        
+        if run and elapsed >= 1000 / speed:
+            elapsed = 0
+            update()
+            
+        pygame.display.set_caption('%s' % tca.generation)
+        pygame.display.flip()
+    
+    pygame.quit()
