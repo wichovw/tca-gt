@@ -298,6 +298,8 @@ def simple_2lane_map(size=5):
         cell.viewer_address[0] += size
         cell.viewer_address[1] += size
         
+    topo.streets = [s.cells[0].street for s in streets]
+        
     streets[0].cells[-2].connection = int_.cells[0]
     streets[0].cells[-1].connection = int_.cells[1]
     streets[1].cells[-2].connection = int_.cells[2]
@@ -434,6 +436,9 @@ def totito_2lane_map(size=5):
     crosses.append(simple_2lane_map(size))
     crosses.append(simple_2lane_map(size))
     crosses.append(simple_2lane_map(size))
+    
+    for cross in crosses:
+        topo.streets.extend(cross.streets)
     
     side = size * 2 + 3
     for cell in crosses[1].cells + crosses[1].lights:
@@ -605,6 +610,9 @@ def grid_2lane_map(size=5, width=2, height=2):
             totito = totito_2lane_map(size)
             row.append(totito)
             totitos.append(totito)
+    
+    for totito in totitos:
+        topo.streets.extend(totito.streets)
     
     totito_size = size * 4 + 8
     for i in range(height):

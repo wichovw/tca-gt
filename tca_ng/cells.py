@@ -52,6 +52,10 @@ class IntersectionCell(Cell):
     routes = None
     intersection = None
     
+    def __init__(self):
+        super().__init__()
+        self.routes = []
+    
     def get_front_cells(self, n, route=None):
         if route is None:
             return []
