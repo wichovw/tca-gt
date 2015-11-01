@@ -78,7 +78,10 @@ def generate_wide_street(length, lanes, rate=0.8):
         if isinstance(cell, tca_ng.cells.EndpointCell):
             cell.rate = rate
         lane = (lane + 1) % lanes
-            
+
+    # Eddy
+    topo.streets.append(street)
+
     return topo
 
 def simple_intersection(rate=0.8):
@@ -326,7 +329,13 @@ def simple_2lane_map(size=5):
     int_o = int_.cells[0].intersection
     streets[0].cells[0].street.exit_routes.extend([int_o.routes[0], int_o.routes[1], int_o.routes[2]])
     streets[1].cells[0].street.exit_routes.extend([int_o.routes[3], int_o.routes[4], int_o.routes[5]])
-     
+
+    # Eddy
+    int_o.in_streets.append(streets[0].cells[0].street)
+    int_o.in_streets.append(streets[1].cells[0].street)
+    int_o.out_streets.append(streets[2].cells[0].street)
+    int_o.out_streets.append(streets[3].cells[0].street)
+
     for street in streets:
         topo.cells += street.cells
     topo.cells += int_.cells
@@ -484,8 +493,15 @@ def totito_2lane_map(size=5):
     crosses[2].cells[4 * size * 2 - 2].front_cell = crosses[1].cells[0]
     crosses[2].cells[4 * size * 2 - 1].front_cell = crosses[1].cells[1]
     
-    # Eddy hace cosas extrañas
-    # XXX
+    # Eddy
+    crosses[0].cells[40].intersection.neighbors.append(crosses[1].cells[40].intersection)
+    crosses[2].cells[40].intersection.neighbors.append(crosses[3].cells[40].intersection)
+    crosses[0].cells[40].intersection.neighbors.append(crosses[3].cells[40].intersection)
+    crosses[2].cells[40].intersection.neighbors.append(crosses[1].cells[40].intersection)
+    crosses[1].cells[40].intersection.neighbors.append(crosses[0].cells[40].intersection)
+    crosses[3].cells[40].intersection.neighbors.append(crosses[2].cells[40].intersection)
+    crosses[3].cells[40].intersection.neighbors.append(crosses[0].cells[40].intersection)
+    crosses[1].cells[40].intersection.neighbors.append(crosses[2].cells[40].intersection)
         
     for cross in crosses:
         for cell in cross.endpoint_cells:
