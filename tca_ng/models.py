@@ -207,6 +207,8 @@ class Topology:
         self.lights = []
         self.semaphores = []
         self.cars = []
+#        self.intersections = []
+        self.streets = []
     
     def get_view(self, desc=False):
         max_x = 0

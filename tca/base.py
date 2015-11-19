@@ -73,6 +73,8 @@ class Rule:
         if self.car is None:
             return
         self.nasch_rules()
+        self.avoid_deadlock()
+        self.move_car()
         
     def nasch_rules(self):
         # rule 1 (acceleration):
@@ -85,7 +87,22 @@ class Rule:
         if random.random() < self.car.decelerate_rate:
             self.car.p.speed = max(0, self.car.p.speed - 1)
             
-        # move car
+    def avoid_deadlock(self):
+        # if not in street, ignore
+        if not hasattr(self.cell, 'street'):
+            return
+        # if car does not have destination yet, ignore
+        if self.car.dest_street is None:
+            return
+        # if car stays in street, ignore
+        if not self.cell.cells_to_end <= self.car.p.speed:
+            return
+        # if destination is dense, stop
+        if (self.car.dest_street.get_density() > 0.8 and 
+            random.random() <= self.cell.topology.automaton.deadlock_avoidance):
+            self.car.p.speed = 0
+            
+    def move_car(self):
         if self.car.p.speed > 0:
             self.car.p.cell = self.front_cells[self.car.p.speed - 1]
             self.car.p.cell.p.car = self.car
@@ -103,7 +120,25 @@ class StreetRule(Rule):
     def pre_setting(self):
         super().pre_setting()
         self.calculate_changing_lane_rates()
+        self.calculate_changing_routes()
         self.change_lane_rules()
+        
+    def calculate_changing_routes(self):
+        if self.car is None:
+            return
+        # if is not first in street, exit
+        if self.cell.cells_to_end > 1 or len(self.cell.street.exit_routes) <= 0:
+            self.car.waits_for_lane_change = 0
+            return
+        # if is not in green, exit
+        if self.car.route is not None and self.car.route not in self.car.route.cells[0].intersection.semaphore.get_active_light().routes:
+            return
+        if self.car.waits_for_lane_change >= self.car.changing_route_max_wait:
+            self.cell.street.car_entry(self.car)
+            self.car.waits_for_lane_change = 0
+#            print(self.cell.topology.automaton.generation, 'deadlock avoidance')
+        else:
+            self.car.waits_for_lane_change += 1
         
     def calculate_changing_lane_rates(self):
         if self.car is None:
@@ -116,12 +151,12 @@ class StreetRule(Rule):
             
         dif = self.cell.lane - self.car.route.entrance_lane
         if dif != 0:
-            if (self.cell.cells_to_end <= 1 and 
-                self.car.route in self.car.route.cells[0].intersection.semaphore.get_active_light().routes):
-                self.car.waits_for_lane_change += 1
-                if self.car.waits_for_lane_change >= self.car.changing_route_max_wait:
-                    self.car.route = random.choice(self.cell.connection.routes)
-                    self.car.waits_for_lane_change = 0
+#            if (self.cell.cells_to_end <= 1 and 
+#                self.car.route in self.car.route.cells[0].intersection.semaphore.get_active_light().routes):
+#                self.car.waits_for_lane_change += 1
+#                if self.car.waits_for_lane_change >= self.car.changing_route_max_wait:
+#                    self.car.route = random.choice(self.cell.connection.routes)
+#                    self.car.waits_for_lane_change = 0
 #                    print('deadlock avoidance')
                 
             self.car.right_change_rate = 1 if dif < 0 else 0
@@ -190,6 +225,7 @@ class Car:
     cell = None
     speed = 0
     route = None
+    dest_street = None
     v_max = 3
     p = None
     
@@ -308,6 +344,7 @@ class Automaton:
     topology = None
     generation = 0
     cycle = 40
+    deadlock_avoidance = 1
     
     def __init__(self, topology):
         self.topology = topology
@@ -367,8 +404,21 @@ class Street:
     def car_entry(self, car):
         if len(self.exit_routes) > 0:
             car.route = random.choice(self.exit_routes)
+            destination = car.route.cells[-1].connection
+            if isinstance(destination, StreetCell):
+                car.dest_street = destination.street
+            else:
+                car.dest_street = None
         else:
             car.route = None
+            car.dest_street = None
+            
+    def get_density(self):
+        cars = 0
+        for lane in self.cells:
+            for cell in lane:
+                cars += 1 if cell.car is not None else 0
+        return cars / (self.length * self.lanes)
 
 
 class Route:
@@ -512,3 +562,4 @@ class Topology:
         self.lights = []
         self.semaphores = []
         self.cars = []
+        self.streets = []

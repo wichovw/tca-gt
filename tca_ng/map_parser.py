@@ -142,6 +142,8 @@ def render(topology, name='map'):
                 'exit_routes': [r.id for r in street.exit_routes]
             })
         
+    print(len(data['streets']))
+        
     data['intersections'] = []
     data['routes'] = []
     data['semaphores'] = []

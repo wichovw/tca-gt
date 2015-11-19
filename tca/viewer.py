@@ -194,6 +194,9 @@ def start(automaton, square_size=16, speed=10):
             "Lane change prob.: %.2f   " % board.selected_car.lane_changing_rate,
             1, (255, 255, 255), (0, 0, 0))
         
+        wildcard = data_font.render(
+            "dest density: %s   " % board.selected_car.dest_street.get_density() if board.selected_car.dest_street is not None else "-",
+            1, (255, 255, 255), (0, 0, 0))
         
         line = 0
         screen.blit(generations, (panel_start_x, 70 + (line)*30)); line += 1
@@ -210,6 +213,8 @@ def start(automaton, square_size=16, speed=10):
         screen.blit(car_speed, (panel_start_x, 70 + (line)*30)); line += 1
         screen.blit(car_speed_units, (panel_start_x, 70 + (line)*30)); line += 1
         screen.blit(car_change, (panel_start_x, 70 + (line)*30)); line += 1
+        line += 1
+        screen.blit(wildcard, (panel_start_x, 70 + (line)*30)); line += 1
         
     while done == False:
         elapsed += clock.tick(60)
@@ -220,11 +225,15 @@ def start(automaton, square_size=16, speed=10):
                 if event.key == pg_locals.K_SPACE:
                     run = not run
             if event.type == pg_locals.KEYUP:
-                if event.key == pg_locals.K_q:
+                if event.key == pg_locals.K_q or event.key == pg_locals.K_ESCAPE:
                     done = True
                 elif event.key == pg_locals.K_n:
                     run = False
                     update()
+                elif event.key == pg_locals.K_UP:
+                    speed *= 1.5
+                elif event.key == pg_locals.K_DOWN:
+                    speed /= 1.5
         
         if run and elapsed >= 1000 / speed:
             elapsed = 0
