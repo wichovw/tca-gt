@@ -1,5 +1,6 @@
 import pygame, pygame.locals as pg_locals
 import glob
+import random
 from PIL import Image
 from tca import base
 
@@ -15,11 +16,14 @@ colors = {
     'intersection': (0x99, 0x99, 0x99),
 }
 
-def get_color(cell):
+def get_color(cell, selected_car):
     if isinstance(cell, base.StreetCell):
         color = 'street'
     elif isinstance(cell, base.IntersectionCell):
         color = 'intersection'
+        if selected_car is not None and selected_car.route is not None:
+            if cell in selected_car.route.cells:
+                color = 'entrance'
     elif isinstance(cell, base.Light):
         color = 'green' if cell.free else 'red'
     else:
@@ -27,7 +31,7 @@ def get_color(cell):
         
     if isinstance(cell, base.Cell):
         if cell.car is not None:
-            color = 'special_car' if cell.car.id % 10 == 0 else 'car'
+            color = 'special_car' if cell.car == selected_car else 'car'     
             
     return color
 
@@ -58,6 +62,7 @@ class Board:
     automaton = None
     cells = []
     size = None
+    selected_car = None
     
     def __init__(self, automaton):
         self.automaton = automaton
@@ -74,7 +79,7 @@ class Board:
             cell = Cell()
             cell.aut_cell = aut_cell
             cell.location = aut_cell.viewer_address
-            cell.color = get_color(aut_cell)
+            cell.color = get_color(aut_cell, self.selected_car)
             self.cells.append(cell)
             return max_x, max_y
             
@@ -86,7 +91,7 @@ class Board:
         
     def update(self):
         for cell in self.cells:
-            cell.color = get_color(cell.aut_cell)
+            cell.color = get_color(cell.aut_cell, self.selected_car)
             
     def draw(self, screen, tiles):
         for cell in self.cells:
@@ -99,16 +104,19 @@ def start(automaton, square_size=16, speed=10):
     pygame.init()
     board = Board(automaton)
     
+    panel_width = 300
+    
     info = pygame.display.Info()
     square_size = min(
         square_size, 
-        info.current_w // board.size[0], 
+        (info.current_w - panel_width) // board.size[0], 
         info.current_h // board.size[1]
     )
     
-    width = board.size[0] * square_size
+    width = board.size[0] * square_size + panel_width
     height = board.size[1] * square_size
     screen_size = (width, height)
+    panel_start_x = width - panel_width + 25
     
     create_tiles(square_size)
     
@@ -120,6 +128,9 @@ def start(automaton, square_size=16, speed=10):
     )
     clock = pygame.time.Clock()
     
+    title_font = pygame.font.SysFont("sansserif", 32)
+    data_font = pygame.font.SysFont("sansserif", 24)
+    
     res_route = 'tca/res/%s_%s.png'
     tiles = {}
     for color in colors:
@@ -129,6 +140,9 @@ def start(automaton, square_size=16, speed=10):
     run = False
     done = False
     
+    label = title_font.render("Traffic Simulator", 1, (255, 255, 255))
+    screen.blit(label, (panel_start_x, 25))
+    
     board.draw(screen, tiles)
     pygame.display.flip()
     
@@ -136,6 +150,66 @@ def start(automaton, square_size=16, speed=10):
         automaton.update()
         board.update()
         board.draw(screen, tiles)
+        
+        cars = [c.car for c in automaton.topology.cells if c.car is not None]
+        m_cars = [c for c in cars if c.speed > 0]
+        factor = 10.38461538
+        if board.selected_car not in cars:
+            board.selected_car = random.choice(cars)
+        
+        generations = data_font.render(
+            "TCA generations: %s (%.1f min)   " % (automaton.generation, automaton.generation*2.6/60),
+            1, (255, 255, 255), (0, 0, 0))
+        
+        no_of_cars = data_font.render(
+            "Total number of cars: %s   " % len(cars),
+            1, (255, 255, 255), (0, 0, 0))
+        avg_speed = data_font.render(
+            "Average speed: %.2f cells / iter   " % (sum(c.speed for c in cars) / max(1, len(cars))),
+            1, (255, 255, 255), (0, 0, 0))
+        avg_speed_units = data_font.render(
+            "Average speed: %.2f km / h   " % (sum(c.speed for c in cars) / max(1, len(cars)) * factor),
+            1, (255, 255, 255), (0, 0, 0))
+        
+        m_no_of_cars = data_font.render(
+            "Number of cars in movement: %s   " % len(m_cars),
+            1, (255, 255, 255), (0, 0, 0))
+        m_avg_speed = data_font.render(
+            "Average speed: %.2f cells / iter   " % (sum(c.speed for c in m_cars) / max(1, len(m_cars))),
+            1, (255, 255, 255), (0, 0, 0))
+        m_avg_speed_units = data_font.render(
+            "Average speed: %.2f km / h   " % (sum(c.speed for c in m_cars) / max(1, len(m_cars)) * factor),
+            1, (255, 255, 255), (0, 0, 0))
+        
+        car_id = data_font.render(
+            "Selected car id: %s   " % board.selected_car.id,
+            1, (255, 255, 255), (0, 0, 0))
+        car_speed = data_font.render(
+            "Car speed: %s cells / iter   " % board.selected_car.speed,
+            1, (255, 255, 255), (0, 0, 0))
+        car_speed_units = data_font.render(
+            "Car speed: %.2f km / h   " % (board.selected_car.speed * factor),
+            1, (255, 255, 255), (0, 0, 0))
+        car_change = data_font.render(
+            "Lane change prob.: %.2f   " % board.selected_car.lane_changing_rate,
+            1, (255, 255, 255), (0, 0, 0))
+        
+        
+        line = 0
+        screen.blit(generations, (panel_start_x, 70 + (line)*30)); line += 1
+        line += 1
+        screen.blit(no_of_cars, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(avg_speed, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(avg_speed_units, (panel_start_x, 70 + (line)*30)); line += 1
+        line += 1
+        screen.blit(m_no_of_cars, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(m_avg_speed, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(m_avg_speed_units, (panel_start_x, 70 + (line)*30)); line += 1
+        line += 1
+        screen.blit(car_id, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(car_speed, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(car_speed_units, (panel_start_x, 70 + (line)*30)); line += 1
+        screen.blit(car_change, (panel_start_x, 70 + (line)*30)); line += 1
         
     while done == False:
         elapsed += clock.tick(60)

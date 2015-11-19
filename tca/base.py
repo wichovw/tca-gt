@@ -116,7 +116,8 @@ class StreetRule(Rule):
             
         dif = self.cell.lane - self.car.route.entrance_lane
         if dif != 0:
-            if self.cell.cells_to_end <= 1:
+            if (self.cell.cells_to_end <= 1 and 
+                self.car.route in self.car.route.cells[0].intersection.semaphore.get_active_light().routes):
                 self.car.waits_for_lane_change += 1
                 if self.car.waits_for_lane_change >= self.car.changing_route_max_wait:
                     self.car.route = random.choice(self.cell.connection.routes)
