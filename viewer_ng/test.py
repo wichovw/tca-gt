@@ -4,12 +4,6 @@ from viewer_ng.image_creator import create_tiles
 from tca_ng import cells, models, example_maps, cars
 from pygame import locals
 
-
-# number of iterations per second
-speed = 10
-# size of squares in pixels
-square_size = 16
-
 #tca = models.Automaton()
 #topo = example_maps.grid_2lane_map(width=2, height=2)
 #tca.topology = topo
@@ -107,7 +101,7 @@ class Board:
         for cell in self.cells:
             screen.blit(
                 tiles[cell.color],
-                cell.absolute_location(square_size)
+                cell.absolute_location(self.square_size)
             )
             
 def test():
@@ -197,7 +191,6 @@ def test():
     pygame.quit()
     
 def start_viewer(topology, square_size=16, speed=10):
-    create_tiles(square_size)
     pygame.init()
     
     tca = models.Automaton()
@@ -205,11 +198,23 @@ def start_viewer(topology, square_size=16, speed=10):
     topology.automaton = tca
     board = Board(tca)
     
+    info = pygame.display.Info()
+    
+    square_size = min(
+        square_size, 
+        info.current_w // board.size[0], 
+        info.current_h // board.size[1]
+    )
+    
     width = board.size[0] * square_size
     height = board.size[1] * square_size
     screen_size = (width, height)
     
-    screen = pygame.display.set_mode(screen_size)
+    create_tiles(square_size)
+    
+    board.square_size = square_size
+    
+    screen = pygame.display.set_mode(screen_size, locals.FULLSCREEN | locals.NOFRAME)
     clock = pygame.time.Clock()
     
     tiles = {
